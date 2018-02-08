@@ -1,0 +1,64 @@
+/home/bap/workspace/bap-0.7/pin/pin -t /home/bap/workspace/bap-0.7/pintraces/obj-ia32/gentrace.so -time-limit 20 -taint-offsets 0x1 -taint-offsets 20 -o 1-1 -log-limit 10000 -ins-limit 1000000 -c 'mywps'  -taint-files good.txt  -- /home/bap/workspace/bap-0.7/pintraces/mywps  /home/bap/workspace/bap-0.7/pintraces/good.txt
+
+/home/l/bap/pin/pin -t /home/l/bap/pintraces/obj-ia32/gentrace.so -o pin_suite-bap-pin-test.out -taint-files 1.txt -- /home/l/bap/mywps/mywps /home/l/bap/mywps/1.txt
+
+
+1.pin记录生成trace
+
+cd pin
+pin -t /home/liu/bap-0.8/pintraces/obj-intel64/gentrace.so -o 1-1 -log-limit 1000 -ins-limit 1000000 -c "mywps" -taint-files serial.txt -taint-offsets 1 -taint-offsets 2 -- ./mywps 
+
+/home/l/bap/pin/pin -t /home/l/bap/pintraces/obj-ia32/gentrace.so -o pin_suite-bap-pin-test.out -taint-files 1.txt -- /home/l/bap/mywps/mywps /home/l/bap/mywps/1.txt 
+
+
+2.提升为il文件
+streamtrans -tracestream ./8189-pin_suite-bap-pin-test.out -trace-concrete -pp-ast x.il
+
+3.处理il文件中的@taint_intro
+deal_il x.il xx.il
+
+4.优化
+iltrans -il xx.il -replace-unknowns -uniqueify-labels -pp-ast x_1.il
+
+5.条件翻转，对指定的第K个条件进行翻转，并删除K条件后的语句。
+命令行：
+convertpath x_1.il k x_1_c.il
+convertpath x_1.il 2 x_1_c.il
+[输入文件] x_1.il，优化后的IL文件 
+[输出文件] x_1_c.il，翻转后的IL文件，如果K大于IL中的条件总数，则不生成输出文件。
+
+
+6.x_1.il->x.f，对IL进行约束条件收集，并生成约束条件范式文件。
+命令行：
+topredicate -il x_1_c.il -q -noopt -stp-out x.f
+
+topredicate -il x_1.il -q -noopt -stp-out x.f
+[输入文件] x_1_c.il，条件翻转后的IL文件
+[输出文件] x.f，约束条件范式文件
+
+
+7. 求解
+ 对约束条件范式进行求解。
+命令行：
+stp x.f  >  x.s
+[输入文件] x.f，约束条件范式文件
+[输出文件] x.s，求解结果文件
+
+3) 结合求解结果与污点映射文件，将样本修改为新样本。
+命令行：
+makenewsample x.s x.mark x.sample new.sample
+makenewsample x.s 1-1-assist.txt serial.txt new.txt
+[输入文件1] x.s，求解结果文件
+[输入文件2] x.mark，污点映射文件
+[输入文件3] x.sample，样本文件
+[输出文件] new.sample，新样本文件。如果新样本大小为空，说明求解失败。
+ echo -e -n "\x03\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00">assist.txt
+
+hexdump -C assist.txt 
+
+
+
+
+
+
+
