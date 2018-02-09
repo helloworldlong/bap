@@ -5,7 +5,9 @@
 #include "trace.container.hpp"
 #include <cassert>
 #include <sstream>
-
+#ifndef _WIN32
+#include <unistd.h>             // due to Debian 7
+#endif
 //#define DEBUG
 #ifdef DEBUG
   #define dbg_printf(...) printf(__VA_ARGS__)
@@ -36,7 +38,10 @@ const unsigned int UNIX_FAILURE = -1;
 
 using namespace std;
 using namespace pintrace;
-
+//2018
+extern uint32_t  g_TaintAsistBuff[5120];
+extern uint32_t  g_tsbufidx;
+/////////////
 /** Skip this many taint introductions. */
 int g_skipTaints = 0;
 
@@ -167,7 +172,13 @@ bool TaintTracker::isMem(RegMem_t type)
     return (type.type == MEM);
 }
 
-// 
+//2018
+void TaintTracker::trackOffset(uint32_t offset, uint32_t length)
+{
+  taint_s  t(offset,length);
+  taint_sources.insert(t);
+} 
+/////////////
 uint32_t TaintTracker::exists(context &ctx, uint32_t elem)
 {
   return (ctx.find(elem) != ctx.end());
@@ -232,6 +243,11 @@ FrameOption_t TaintTracker::introMemTaint(ADDRINT addr, uint32_t length, const c
         } else {
           t = taintnum++;
           taint_mappings[r] = t;
+          //1208
+          g_TaintAsistBuff[ g_tsbufidx + 1] = offset+i;
+		  g_tsbufidx++;
+		  *(uint32_t *)g_TaintAsistBuff = g_tsbufidx;
+		  ////////////////////////
           cerr << "adding new mapping from " << source << " to " << offset+i << " on taint num " << t << endl;
         }
       }
@@ -265,7 +281,24 @@ FrameOption_t TaintTracker::introMemTaint(ADDRINT addr, uint32_t length, const c
 FrameOption_t TaintTracker::introMemTaintFromFd(uint32_t fd, ADDRINT addr, uint32_t length) {
   dbg_printf("introMemTaintFromFd fd=%d addr=0x%016lx length=%x\n", fd, addr, length);
   assert(fds.find(fd) != fds.end());
-  FrameOption_t tfs = introMemTaint(addr, length, fds[fd].name.c_str(), fds[fd].offset);
+  //1208
+  //////////////////////////////////////////
+  std::set<taint_s>::iterator pos;
+  FrameOption_t tfs;
+  for (pos = taint_sources.begin(); pos != taint_sources.end();pos++) 
+  {
+    ///first is file offset ,second is length
+    int lower = pos->first > fds[fd].offset ? pos->first:fds[fd].offset;
+    int upper = pos->first + pos->second < fds[fd].offset +length? pos->first + pos->second:fds[fd].offset +length;
+    if(upper >=lower)
+    {
+      tfs = introMemTaint(addr+ lower - fds[fd].offset, upper - lower,
+        fds[fd].name.c_str(), lower);
+        
+    }
+  }
+  /////////////////////////////////////////////
+  //FrameOption_t tfs = introMemTaint(addr, length, fds[fd].name.c_str(), fds[fd].offset);
   fds[fd].offset += length;
   return tfs;
 }
