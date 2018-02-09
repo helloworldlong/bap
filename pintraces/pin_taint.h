@@ -162,7 +162,9 @@ namespace pintrace { // We will use namespace to avoid collision
 
      // A function to apply taint policies
      bool taintChecking();
-
+     //2018
+     void trackOffset(uint32_t offset, uint32_t length);
+     //////////////
      void setTaintContext(context &delta);
 
      void resetTaint(context &delta);
