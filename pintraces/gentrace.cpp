@@ -395,7 +395,7 @@ typedef struct ThreadInfo_s {
     context delta;
 } ThreadInfo_t;
 
-int g_counter = 0;
+uint64_t g_counter = 0;
 
 //TraceWriter *g_tw;
 TraceContainerWriter *g_twnew;
@@ -2750,9 +2750,9 @@ int main(int argc, char *argv[])
 	sprintf(CoverageModule,"%s",KnobCoverage.Value().c_str());
 	uint32_t NumOffsetsParams;
 	NumOffsetsParams =  TaintedOffsets.NumberOfValues()>>1;
-	if(NumOffsetsParams%2!=0)
+	if(TaintedOffsets.NumberOfValues() % 2 != 0)
     {
-        cout<<"Offset parameter is wrong!"<<endl;
+        cout<<"Offset parameter is wrong!  "<<endl;
         exit(0);
     }      
 	for (uint32_t j = 0; j <NumOffsetsParams; j++) 

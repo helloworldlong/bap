@@ -1,4 +1,7 @@
 *.a
+*.bpt
+*addrs.txt
+*assist.txt
 *.annot
 *.byte
 *.cma

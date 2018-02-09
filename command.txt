@@ -1,6 +1,6 @@
 /home/bap/workspace/bap-0.7/pin/pin -t /home/bap/workspace/bap-0.7/pintraces/obj-ia32/gentrace.so -time-limit 20 -taint-offsets 0x1 -taint-offsets 20 -o 1-1 -log-limit 10000 -ins-limit 1000000 -c 'mywps'  -taint-files good.txt  -- /home/bap/workspace/bap-0.7/pintraces/mywps  /home/bap/workspace/bap-0.7/pintraces/good.txt
 
-/home/l/bap/pin/pin -t /home/l/bap/pintraces/obj-ia32/gentrace.so -o pin_suite-bap-pin-test.out -taint-files 1.txt -- /home/l/bap/mywps/mywps /home/l/bap/mywps/1.txt
+/home/l/bap/pin/pin -t /home/l/bap/pintraces/obj-ia32/gentrace.so -taint-offsets 0x1 -taint-offsets 6 -o 1-1 -log-limit 10000 -ins-limit 1000000 -c "mywps"  -taint-files 1.txt -- /home/l/bap/mywps/mywps /home/l/bap/mywps/1.txt
 
 
 1.pin记录生成trace
