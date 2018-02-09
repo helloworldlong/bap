@@ -21,7 +21,7 @@ OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWA
 #include "stp/Util/GitSHA1.h"
 const char* stp::get_git_version_sha()
 {
-    static const char version_sha[] = "2f60a35e822200a1ec50eea3a947a322b45da363";
+    static const char version_sha[] = "d89fcf8dc41d45e7d3a19393db860ac0b1381144";
     return version_sha;
 }
 

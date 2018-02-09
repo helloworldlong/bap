@@ -142,10 +142,10 @@ lib/preinstall: lib/Util/preinstall
 # Target rules for target lib/CMakeFiles/libstp.dir
 
 # All Build rule for target.
-lib/CMakeFiles/libstp.dir/all: lib/Globals/CMakeFiles/stpglobals.dir/all
-lib/CMakeFiles/libstp.dir/all: lib/AST/CMakeFiles/AST.dir/all
 lib/CMakeFiles/libstp.dir/all: lib/AbsRefineCounterExample/CMakeFiles/abstractionrefinement.dir/all
+lib/CMakeFiles/libstp.dir/all: lib/AST/CMakeFiles/AST.dir/all
 lib/CMakeFiles/libstp.dir/all: lib/Simplifier/CMakeFiles/simplifier.dir/all
+lib/CMakeFiles/libstp.dir/all: lib/Globals/CMakeFiles/stpglobals.dir/all
 lib/CMakeFiles/libstp.dir/all: lib/Printer/CMakeFiles/printer.dir/all
 lib/CMakeFiles/libstp.dir/all: lib/Parser/CMakeFiles/parser.dir/all
 lib/CMakeFiles/libstp.dir/all: lib/Interface/CMakeFiles/cinterface.dir/all
@@ -190,10 +190,10 @@ clean: lib/CMakeFiles/libstp.dir/clean
 # Target rules for target lib/CMakeFiles/libstp_static.dir
 
 # All Build rule for target.
-lib/CMakeFiles/libstp_static.dir/all: lib/Globals/CMakeFiles/stpglobals.dir/all
-lib/CMakeFiles/libstp_static.dir/all: lib/AST/CMakeFiles/AST.dir/all
 lib/CMakeFiles/libstp_static.dir/all: lib/AbsRefineCounterExample/CMakeFiles/abstractionrefinement.dir/all
+lib/CMakeFiles/libstp_static.dir/all: lib/AST/CMakeFiles/AST.dir/all
 lib/CMakeFiles/libstp_static.dir/all: lib/Simplifier/CMakeFiles/simplifier.dir/all
+lib/CMakeFiles/libstp_static.dir/all: lib/Globals/CMakeFiles/stpglobals.dir/all
 lib/CMakeFiles/libstp_static.dir/all: lib/Printer/CMakeFiles/printer.dir/all
 lib/CMakeFiles/libstp_static.dir/all: lib/Parser/CMakeFiles/parser.dir/all
 lib/CMakeFiles/libstp_static.dir/all: lib/Interface/CMakeFiles/cinterface.dir/all

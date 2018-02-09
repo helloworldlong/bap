@@ -12,7 +12,7 @@ pin -t /home/liu/bap-0.8/pintraces/obj-intel64/gentrace.so -o 1-1 -log-limit 100
 
 
 2.提升为il文件
-streamtrans -tracestream ./8189-pin_suite-bap-pin-test.out -trace-concrete -pp-ast x.il
+streamtrans -tracestream ./1-1-trace.bpt -trace-concrete -pp-ast x.il
 
 3.处理il文件中的@taint_intro
 deal_il x.il xx.il
@@ -47,7 +47,7 @@ stp x.f  >  x.s
 3) 结合求解结果与污点映射文件，将样本修改为新样本。
 命令行：
 makenewsample x.s x.mark x.sample new.sample
-makenewsample x.s 1-1-assist.txt serial.txt new.txt
+makenewsample x.s 1-1-assist.txt 1.txt new.txt
 [输入文件1] x.s，求解结果文件
 [输入文件2] x.mark，污点映射文件
 [输入文件3] x.sample，样本文件

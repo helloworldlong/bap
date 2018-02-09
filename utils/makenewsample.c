@@ -13,9 +13,9 @@ int main(int argc, char *argv[])
 	if(argc == 1)
 	{ 
  		printf("search in stp's output file, get solved value and make new sample file associated with taint mark file.\n");
-  	printf("argv[1]:stp's output filename\n");
-  	printf("argv[2]:taint mark filename\n");
-  	printf("argv[3]:old sample filename\n");
+		printf("argv[1]:stp's output filename\n");
+		printf("argv[2]:taint mark filename\n");
+		printf("argv[3]:old sample filename\n");
  		printf("argv[4]:new sample filename\n");
 		return 0;
 	}
@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
 
 	//get offset & value from taint mark file
 	FILE* fpt = fopen(argv[2], "rb");
+	
 	if(fpt == NULL) 
 	{
 		printf("can't open taint mark file\n");
@@ -53,6 +54,7 @@ int main(int argc, char *argv[])
 	}	
 
  	FILE* fpo = fopen(argv[3], "rb");
+	printf("old sample %s\n",argv[2]);
 	if(fpo == NULL) 
 	{
 		printf("can't open old sample file\n");
