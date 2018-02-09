@@ -8,6 +8,8 @@
 #include <fstream>
 #include <map>
 #include <set>
+#include <iomanip>
+#include <list>
 #include <vector>
 #include <string.h>
 #ifndef _WIN32
@@ -124,7 +126,9 @@ namespace pintrace { // We will use namespace to avoid collision
     string name;
     uint64_t offset;
   };  
-
+  //2018
+	typedef std::pair<uint32_t,uint32_t> taint_s;
+  /////////////////////
   typedef std::pair<string, uint64_t> resource_t;
   
    // Tracking the taint during program flow
@@ -234,6 +238,9 @@ namespace pintrace { // We will use namespace to avoid collision
      uint32_t count;
      
      /********** Syscall-specific vars ***********/
+     //2018
+     std::set<taint_s> taint_sources;
+     ///////////
      std::set<string> taint_files;
      std::map<resource_t, uint32_t> taint_mappings;
      std::map<uint32_t, fdInfo_t> fds;
