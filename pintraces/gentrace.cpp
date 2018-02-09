@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <stack>
+#include <list>
 #include <vector>
 #include <cstring>
 #include <stdint.h>
@@ -133,7 +134,28 @@ namespace WINDOWS {
 #ifndef DEBUG_LOCK
 #define DEBUG_LOCK 0
 #endif
+//2018
+typedef list<int> INTLIST;
+INTLIST g_bbls; //buffer logging the bbl addrs 
+int count_bbls = 0;
+char CoverageModule[0x20];  //coverage module name
+ofstream fpaddrs;  //bbl address file
+ADDRINT  DllbaseAddress=0; //module base address
+ADDRINT  DllhighAddress=0; //module high address
+uint32_t  g_TaintAsistBuff[4096]; //assist buffer -> taint bytes range 
+uint32_t g_tsbufidx; //assist index
+uint64_t g_Execlimit; //exec limit
+KNOB<string> KnobCoverage(KNOB_MODE_WRITEONCE, "pintool",
+                     "c", "docreader.dll",
+                     "Coverage fraction module.");
+KNOB<uint64_t> KnobInsLimit(KNOB_MODE_WRITEONCE, "pintool",
+                            "ins-limit", "0",
+                            "Number of instructions to excution.");
+KNOB<int> TaintedOffsets(KNOB_MODE_APPEND, "pintool",
+                            "taint-offsets", "",
+                            "Consider the given offsets as being tainted");
 
+///////////////
 KNOB<string> KnobOut(KNOB_MODE_WRITEONCE, "pintool",
                      "o", "out.bpt",
                      "Trace file to output to.");
@@ -1125,7 +1147,14 @@ VOID AppendBuffer(ADDRINT addr,
              << "Code cache size is " << CODECACHE_CodeMemUsed() << endl
              << "Code cache limit is " << CODECACHE_CacheSizeLimit() << endl;
     }
-
+    //2018
+	if(g_Execlimit!=0 && g_counter>g_Execlimit )
+	{
+		cerr << "Logged required number:"<<g_Execlimit<<"  "<<g_counter<<" instructions, quitting.\n";
+		Cleanup();
+        exit(0);
+	}
+	///////////////////////
     LLOG("big thing\n");
 
     PIN_GetLock(&lock, tid+1);
@@ -1830,21 +1859,57 @@ VOID InstrBlock(BBL bbl)
 
 
 }
+//2018  //? It is faster if just comparing the range.
+static bool DoWriteAddr(ADDRINT addr) 
+{
+    if(addr >= DllbaseAddress && addr <= DllhighAddress)
+        return true;
+    else
+        return false;
+    
+}
 
+// maximum size of the buffer.
+ADDRINT WriteBlock(THREADID threadid,ADDRINT addr)
+{
+	//PIN_GetLock(&lock, threadid+1);
+    count_bbls++ ;
+	g_bbls.push_back(addr);
+    if(count_bbls>1024)
+    {
+        INTLIST::iterator plist; 
+        for(plist = g_bbls.begin(); plist != g_bbls.end(); plist++)   
+            fpaddrs << *plist << "\n"; 
+        g_bbls.clear();     
+        count_bbls=0;
+    }
+	//PIN_ReleaseLock(&lock);
+	return 1;
+}
 VOID InstrTrace(TRACE trace, VOID *v)
 {
     dbg_printf("InstrTrace v=%p\n", v);
-
+	ADDRINT addr = TRACE_Address(trace);
+	bool bwriteaddr= false;
+	bwriteaddr = DoWriteAddr(addr);
     /* Decide if we want to log this trace by examining the entrance address. */
-    ADDRINT addr = TRACE_Address(trace);
+    //ADDRINT addr = TRACE_Address(trace);
     if (dontLog(addr)) {
     } else {
         for (BBL bbl = TRACE_BblHead(trace); BBL_Valid(bbl); bbl = BBL_Next(bbl)) {
             InstrBlock(bbl);
+            //1208
+            if(bwriteaddr)
+			{
+                ADDRINT tmp=addr-DllbaseAddress;
+				BBL_InsertCall(bbl,IPOINT_BEFORE,(AFUNPTR)WriteBlock,IARG_THREAD_ID,IARG_ADDRINT,tmp,IARG_END);
+			}
+			/////////
+			
         }
     }
 }
-
+//////////////////
 VOID ThreadEnd(THREADID threadid, CONTEXT *ctx, INT32 code, VOID *v)
 {
     dbg_printf("ThreadEnd tid=%d, code=%d, v=%p\n", threadid, code, v);
@@ -1917,7 +1982,13 @@ VOID ModLoad(IMG img, VOID *v)
     PIN_GetLock(&lock, 0);
     g_twnew->add(f);
     PIN_ReleaseLock(&lock);
-
+    //2018
+	if(strstr(name.c_str(),CoverageModule) != NULL)
+	{
+		DllbaseAddress = IMG_LowAddress(img);
+        DllhighAddress = IMG_HighAddress(img);        
+	}
+	///////////////////
 #ifdef _WIN32
     // Try to find kernel32
     {
@@ -2596,7 +2667,24 @@ VOID Fini(INT32 code, VOID *v)
 VOID Cleanup()
 {
     g_twnew->finish();
+    //2018
+	if(count_bbls>0)
+    {
+        INTLIST::iterator plist; 
+        for(plist = g_bbls.begin(); plist != g_bbls.end(); plist++)   
+            fpaddrs << *plist << "\n"; 
+        g_bbls.clear();     
+        count_bbls=0;
+    }
+	
+    fpaddrs.close();
 
+	stringstream ss;
+	ss << KnobOut.Value()<<"-"<<"assist.txt";
+	FILE *fp = fopen(ss.str().c_str(), "wb");
+	fwrite(g_TaintAsistBuff, 4, g_tsbufidx + 1, fp);
+	fclose(fp);
+    //////////////////////////
     LOG("done.\n");
 
     clock_t endtime = clock();
@@ -2658,7 +2746,23 @@ int main(int argc, char *argv[])
         if (TaintedEnv.Value() != "")
             tracker->setTaintEnv(TaintedEnv.Value());
     }
-
+    //2018
+	sprintf(CoverageModule,"%s",KnobCoverage.Value().c_str());
+	uint32_t NumOffsetsParams;
+	NumOffsetsParams =  TaintedOffsets.NumberOfValues()>>1;
+	if(NumOffsetsParams%2!=0)
+    {
+        cout<<"Offset parameter is wrong!"<<endl;
+        exit(0);
+    }      
+	for (uint32_t j = 0; j <NumOffsetsParams; j++) 
+	{
+	    tracker->trackOffset(TaintedOffsets.Value(2*j),TaintedOffsets.Value(2*j+1));	
+	}
+	stringstream ss2;
+    ss2 <<KnobOut.Value()<<"-"<<"addrs.txt";
+	fpaddrs.open(ss2.str().c_str());
+	///////////////////////
     /* Get a key for thread info */
     tl_key = PIN_CreateThreadDataKey(NULL);
     assert(tl_key != -1);
@@ -2722,8 +2826,13 @@ int main(int argc, char *argv[])
 
     PIN_AddFiniFunction(Fini, 0);
 
-    ss << PIN_GetPid() << "-" << KnobOut.Value();
-
+    //ss << PIN_GetPid() << "-" << KnobOut.Value();
+    //1208
+    g_tsbufidx = 0;
+    g_Execlimit = KnobInsLimit.Value();
+    
+    ss << KnobOut.Value()<< "-" <<"trace.bpt";
+    ////////////////////////
     g_twnew = new TraceContainerWriter(ss.str().c_str(), BFD_ARCH, BFD_MACH, default_frames_per_toc_entry, false);
 
     g_bufidx = 0;
