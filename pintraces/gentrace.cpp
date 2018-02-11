@@ -1886,6 +1886,26 @@ ADDRINT WriteBlock(THREADID threadid,ADDRINT addr)
 	//PIN_ReleaseLock(&lock);
 	return 1;
 }
+
+
+// maximum size of the buffer.
+ADDRINT WriteJZ(THREADID threadid,ADDRINT addr, string *disas)
+{
+	//PIN_GetLock(&lock, threadid+1);
+    count_bbls++ ;
+	g_bbls.push_back(addr);
+    cout <<  std::hex  << addr+DllbaseAddress <<" : "<<*disas<<endl; 
+    if(count_bbls>1024)
+    {
+        INTLIST::iterator plist; 
+        for(plist = g_bbls.begin(); plist != g_bbls.end(); plist++)   
+            fpaddrs<< std::hex  << *plist << "\n"; 
+        g_bbls.clear();     
+        count_bbls=0;
+    }
+	//PIN_ReleaseLock(&lock);
+	return 1;
+}
 VOID InstrTrace(TRACE trace, VOID *v)
 {
     dbg_printf("InstrTrace v=%p\n", v);
@@ -1898,11 +1918,20 @@ VOID InstrTrace(TRACE trace, VOID *v)
     } else {
         for (BBL bbl = TRACE_BblHead(trace); BBL_Valid(bbl); bbl = BBL_Next(bbl)) {
             InstrBlock(bbl);
-            //1208
+            //2018
             if(bwriteaddr)
 			{
-                ADDRINT tmp=addr-DllbaseAddress;
-				BBL_InsertCall(bbl,IPOINT_BEFORE,(AFUNPTR)WriteBlock,IARG_THREAD_ID,IARG_ADDRINT,tmp,IARG_END);
+                INS MyInsTail=BBL_InsTail(bbl);
+                if(INS_Category(MyInsTail) == XED_CATEGORY_COND_BR)
+                {
+                    INS_InsertCall(MyInsTail, IPOINT_BEFORE, AFUNPTR(WriteJZ),
+                    IARG_THREAD_ID,
+                    IARG_ADDRINT, INS_Address(MyInsTail)-DllbaseAddress,
+                    IARG_PTR, new string(INS_Disassemble(MyInsTail)),
+                    IARG_END);
+                }
+                //ADDRINT tmp=addr-DllbaseAddress;
+				//BBL_InsertCall(bbl,IPOINT_BEFORE,(AFUNPTR)WriteBlock,IARG_THREAD_ID,//IARG_ADDRINT,tmp,IARG_END);
 			}
 			/////////
 			
