@@ -6,7 +6,7 @@
 1.pin记录生成trace
 
 cd pin
-pin -t /home/liu/bap-0.8/pintraces/obj-intel64/gentrace.so -o 1-1 -log-limit 1000 -ins-limit 1000000 -c "mywps" -taint-files serial.txt -taint-offsets 1 -taint-offsets 2 -- ./mywps 
+pin -t /home/liu/bap-0.8/pintraces/obj-intel64/gentrace.so -o 1-1 -log-limit 1000 -ins-limit 1000000 -c "mywps" -taint-files serial.txt -taint-offsets 1 -taint-offsets 4 -- ./mywps 
 
 /home/l/bap/pin/pin -t /home/l/bap/pintraces/obj-ia32/gentrace.so -o pin_suite-bap-pin-test.out -taint-files 1.txt -- /home/l/bap/mywps/mywps /home/l/bap/mywps/1.txt 
 

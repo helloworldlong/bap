@@ -5,7 +5,7 @@
 
 //search in stp's output file, get solved value and make new sample file associated with taint mark file.
 //argv[1]:stp's output filename
-//argv[2]:taint mark filename
+//argv[2]:taint assistant mark filename
 //argv[3]:old sample filename
 //argv[4]:new sample filename
 int main(int argc, char *argv[])
@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 	{ 
  		printf("search in stp's output file, get solved value and make new sample file associated with taint mark file.\n");
 		printf("argv[1]:stp's output filename\n");
-		printf("argv[2]:taint mark filename\n");
+		printf("argv[2]:taint assistant mark filename\n");
 		printf("argv[3]:old sample filename\n");
  		printf("argv[4]:new sample filename\n");
 		return 0;
@@ -28,11 +28,11 @@ int main(int argc, char *argv[])
 	
 	if(fpt == NULL) 
 	{
-		printf("can't open taint mark file\n");
+		printf("can't open taint assistant mark file\n");
 		exit(-1);
 	}	
 
-	/*taint mark file*/
+	/*taint assistant mark file*/
 	/* |total number(4bytes)|offset1(4bytes)|offset2(4bytes)|... */
 	fread(&t_size,1,4,fpt);
 	t_offsets = malloc(t_size*4);
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     int fl = fread(buf,1,sizeof(buf),fpo);
     fwrite(buf,1,fl,fpn);
   }
-//上述这个操作是将原sample文件中的内容全部原封不动地写入新的sample文件。
+//
   fclose(fpo);
 
 	char * line = NULL;
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 		{
 			break;
 		}
-		//上述这种情况是处理无解的情况。
+		//no solve
 		if(memcmp(line,"ASSERT(",7) == 0)
 		{
 			char *p = strstr(line,"symb_");
@@ -103,12 +103,12 @@ int main(int argc, char *argv[])
 			IsSovledSuccess = 1;
 			p += 5;
 			char *pp = strstr(p,"_");
-			//找出后者在前者中第一次出现的位置。
+			//
 			char s[20];
 			memset(s,0,20);
 			memcpy(s,p,pp-p);
 			int n = atoi(s);
-			//atoi函数将字符串转换为长整型数据。
+			//
 			pp = strstr(p,"0x");
 			char *ppp = strstr(pp," )");
 			memset(s,0,20);
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				printf("xiaojie:对原样本文件中的第%d个（从1开始）污点第%d偏移（从0开始）处进行修改\n",n,t_offsets[n-1]);
+				printf("The %dth taint variable (start from 1),the offset in the file is %d (start from 0)\n",n,t_offsets[n-1]);
 				fseek(fpn,t_offsets[n-1],SEEK_SET);
 				
 				fwrite(&value,1,1,fpn);
