@@ -4,7 +4,7 @@
 import MySQLdb
 
 # connect the remote mysql
-db = MySQLdb.connect("192.168.178.1","root","123456","mysql" )
+db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
 
 # 
 cursor = db.cursor()
@@ -22,7 +22,8 @@ sql = """CREATE TABLE BAP (
 cursor.execute(sql)
 
 # initial the BAP table
-cursor.execute("INSERT INTO BAP(old_sample_num,new_sample_num,convert_address) VALUES(1,2,0)")
+cursor.execute("INSERT INTO BAP(old_sample_num,new_sample_num,convert_address) VALUES(1,2,0x1a)")
+db.commit()
 
 cursor.execute("SELECT * FROM BAP")
  
