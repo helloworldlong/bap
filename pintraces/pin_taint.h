@@ -40,6 +40,7 @@
   #endif
 #endif
 
+
 // TODO: we need a type for the mapping to variables/registers
 typedef uint32_t var;
 // We only consider 32-bit memory addresses
