@@ -2013,6 +2013,7 @@ VOID ModLoad(IMG img, VOID *v)
 	if(strstr(name.c_str(),CoverageModule) != NULL)
 	{
 		DllbaseAddress = IMG_LowAddress(img);
+        fpaddrs<<hex<<DllbaseAddress<<endl;
         DllhighAddress = IMG_HighAddress(img);        
 	}
 	///////////////////
