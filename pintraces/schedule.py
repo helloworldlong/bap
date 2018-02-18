@@ -101,7 +101,8 @@ def get_base_addr(old_sample_num):
     line = ff.readline()
     base_addr=int(line,16)
     return base_addr
-
+def get_taint_branch():
+    
 
 def bap_cmd(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr):
     run_pin_cmd(old_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name)
