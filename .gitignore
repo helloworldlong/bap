@@ -1,4 +1,7 @@
 pintraces/*.txt
+pintraces/*.il
+pintraces/*.s
+pintraces/*.f
 *.a
 *.bpt
 *addrs.txt

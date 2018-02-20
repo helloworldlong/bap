@@ -195,20 +195,19 @@ def main():
     elfpath=sys.argv[4]
     ext_command=sys.argv[5]
     suffix_name=sys.argv[6]
-    sample_num=1
-    sample_num_tuple=None
+    task_tuple=None
     while 1:
-        while(sample_num_tuple==None):
-            sample_num_tuple=get_sample_num()
-            if(sample_num_tuple==None):
-                print 'no sample to run'
+        while(task_tuple==None):
+            task_tuple=get_task_data()
+            if(task_tuple==None):
+                print 'no address to convert'
                 time.sleep(2)
-        sample_num=sample_num_tuple[0]
-        set_sample_status(sample_num)
-        print sample_num
-        bap_cmd_first(sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name)
-        
-        
+        old_sample_num=task_tuple[0]
+        new_sample_num=task_tuple[1]
+        convert_addr=task_tuple[2]
+        set_task_status(old_sample_num,new_sample_num,convert_addr)
+        base_addr,high_addr=get_base_addr(old_sample_num)
+        bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr+base_addr)
 
             
 
