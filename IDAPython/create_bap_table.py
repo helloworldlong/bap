@@ -11,28 +11,30 @@ cursor = db.cursor()
 
 # drop the table
 cursor.execute("DROP TABLE IF EXISTS task")
-cursor.execute("DROP TABLE IF EXISTS status")
+cursor.execute("DROP TABLE IF EXISTS sample")
 # create table BAP
 sql = """CREATE TABLE task (
          old_sample_num  INT,
          new_sample_num  INT,
          convert_address INT,
-         done INT,
+         status INT,
          PRIMARY KEY (convert_address)
           )"""
 
 cursor.execute(sql)
-sql = """CREATE TABLE status (
-         convert_address  INT,
-         convert_status  INT,
-         PRIMARY KEY (convert_address, convert_status)
+
+sql = """CREATE TABLE sample (
+         sample_num  INT,
+         status INT,
+         PRIMARY KEY (sample_num)
           )"""
 cursor.execute(sql)
+
 # initial the BAP table
-cursor.execute("INSERT INTO task(old_sample_num,new_sample_num,convert_address,done) VALUES(1,0,0,0);")
+cursor.execute("INSERT INTO sample(sample_num,status) VALUES(1,0);")
 db.commit()
 
-cursor.execute("SELECT * FROM task")
+cursor.execute("SELECT * FROM sample")
  
 # 
 rows = cursor.fetchall()
