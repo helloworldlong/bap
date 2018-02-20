@@ -162,7 +162,7 @@ def get_taint_branch(old_sample_num,base_addr,high_addr):
 def insert_sample(sample_num):
     db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
     cursor = db.cursor()
-    sql_cmd='insert into sample(sample_num,status) VALUES('+str(sample_num)+','+str(0)+');'
+    sql_cmd='insert ignore into sample(sample_num,status) values('+str(sample_num)+','+str(0)+');'
     cursor.execute(sql_cmd)
     db.commit()
     db.close()
@@ -203,10 +203,15 @@ def main():
             if(sample_num_tuple==None):
                 print 'no sample to run'
                 time.sleep(2)
-        sample_num=sample_num_tuple[0]
+            else:
+                sample_num=sample_num_tuple[0]
+                print 'get sample_num %d' %sample_num_tuple[0]
+                break
+        
         set_sample_status(sample_num)
         print sample_num
         bap_cmd_first(sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name)
+        sample_num_tuple=None
         
         
 

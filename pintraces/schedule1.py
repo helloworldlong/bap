@@ -71,7 +71,7 @@ def stp_solve(old_sample_num,convert_addr):
     stp_cmd='stp '+str(old_sample_num)+'-4'+hex(convert_addr)+'.f'+' > '+str(old_sample_num)+'-4'+hex(convert_addr)+'.s'
     print "[*] stp  cmd: ", stp_cmd
     os.system(stp_cmd)
-def make_sample(old_sample_num,new_sample_num,suffix_name): #int int string
+def make_sample(old_sample_num,new_sample_num,suffix_name,convert_addr): #int int string
     make_sample_cmd='makenewsample  '+str(old_sample_num)+'-4'+hex(convert_addr)+'.s '+str(old_sample_num)+'-assist.txt '+ str(old_sample_num)+suffix_name+' '+str(new_sample_num)+suffix_name
     print "[*] make_sample  cmd: ", make_sample_cmd
     os.system(make_sample_cmd)
@@ -108,8 +108,8 @@ def get_task_data():#return sample_num
     cursor.execute(sql_cmd)
     data = cursor.fetchone()
     db.close()
-    print data
-    print type(data)
+    #print data
+    #print type(data)
     return data
    
 def set_task_status(old_sample_num,new_sample_num,convert_addr):
@@ -162,7 +162,7 @@ def get_taint_branch(old_sample_num,base_addr,high_addr):
 def insert_sample(sample_num):
     db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
     cursor = db.cursor()
-    sql_cmd='insert into sample(sample_num,status) VALUES('+str(sample_num)+','+str(0)+');'
+    sql_cmd='insert ignore into sample(sample_num,status) values('+str(sample_num)+','+str(0)+');'
     cursor.execute(sql_cmd)
     db.commit()
     db.close()
@@ -171,7 +171,7 @@ def bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,el
     convert_path(old_sample_num,convert_addr)  #0804862C          
     il_f(old_sample_num,convert_addr)
     stp_solve(old_sample_num,convert_addr)
-    make_sample(old_sample_num,new_sample_num,suffix_name)
+    make_sample(old_sample_num,new_sample_num,suffix_name,convert_addr)
     insert_sample(new_sample_num)
     
 def bap_cmd_first(old_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name):
@@ -202,12 +202,16 @@ def main():
             if(task_tuple==None):
                 print 'no address to convert'
                 time.sleep(2)
+            else:
+                print 'task:',
+                print task_tuple
         old_sample_num=task_tuple[0]
         new_sample_num=task_tuple[1]
         convert_addr=task_tuple[2]
         set_task_status(old_sample_num,new_sample_num,convert_addr)
         base_addr,high_addr=get_base_addr(old_sample_num)
         bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr+base_addr)
+        task_tuple=None
 
             
 
