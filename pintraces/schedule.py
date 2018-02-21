@@ -180,7 +180,7 @@ def bap_cmd_first(old_sample_num,offset1,offset2_len,coverage,elfpath,ext_comman
     base_addr,high_addr=get_base_addr(old_sample_num)
     lift_il(old_sample_num)
     get_taint_branch(old_sample_num,base_addr,high_addr)
-    cp_share_folder(old_sample_num)
+    #cp_share_folder(old_sample_num)
 
 def main():
     global base_addr    
