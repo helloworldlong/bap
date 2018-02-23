@@ -120,6 +120,14 @@ def set_task_status(old_sample_num,new_sample_num,convert_addr):
     cursor.execute(sql_cmd)
     db.commit()
     db.close()
+def set_task_status_1(old_sample_num,new_sample_num,convert_addr):
+    db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
+    cursor = db.cursor()
+    sql_cmd='update task set status=3 where (old_sample_num=%d and new_sample_num=%d) and convert_address=%d;' %(old_sample_num,new_sample_num,convert_addr)
+    #print sql_cmd
+    cursor.execute(sql_cmd)
+    db.commit()
+    db.close()
     
 def cp_share_folder(old_sample_num):
     os.system('cp %d-addrs.txt /mnt/hgfs/ubuntu14-disk/share/'%old_sample_num)
@@ -208,10 +216,11 @@ def main():
         old_sample_num=task_tuple[0]
         new_sample_num=task_tuple[1]
         convert_addr=task_tuple[2]
-        set_task_status(old_sample_num,new_sample_num,convert_addr)
+        set_task_status_1(old_sample_num,new_sample_num,convert_addr) #occupy
         base_addr,high_addr=get_base_addr(old_sample_num)
         bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr+base_addr)
         task_tuple=None
+        set_task_status(old_sample_num,new_sample_num,convert_addr)
 
             
 
