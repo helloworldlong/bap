@@ -70,11 +70,10 @@ def insert_task(run_base_addr,old_sample_num):
         convert_addr=int(line,16)-run_base_addr
         print hex(convert_addr)
         sql_cmd='insert ignore into task(old_sample_num,new_sample_num,convert_address,status) values('+str(old_sample_num)+','+str(g_new_num)+','+str(convert_addr)+','+str(0)+');'
-        g_new_num=g_new_num+1
+        
         mm=cursor.execute(sql_cmd)
-        print sql_cmd
-        print mm
-        print type(mm)
+        if(mm):
+            g_new_num=g_new_num+1
         db.commit()
     f_taint.close()
     db.close()
