@@ -2,6 +2,8 @@ pintraces/*.txt
 pintraces/*.il
 pintraces/*.s
 pintraces/*.f
+peda*
+mywps/.gdb_history
 *.a
 *.bpt
 *addrs.txt

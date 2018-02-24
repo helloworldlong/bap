@@ -1099,7 +1099,8 @@ VOID PostInstruction(ADDRINT addr, CONTEXT *ctx) {
     PIN_ExecuteAt(ctx);
 }
 
-VOID AppendBuffer(ADDRINT addr,
+VOID AppendBuffer(string *disas,
+                  ADDRINT addr,
                   THREADID tid,
                   CONTEXT *ctx,
                   BOOL isBranch,
@@ -1200,7 +1201,21 @@ VOID AppendBuffer(ADDRINT addr,
     tracker->setCount(values_count);
 
     bool has_taint = tracker->hasTaint(ti->delta);
+    //long debug
+    std::string str2 ("cmov");
 
+    // different member versions of find in the same order as above:
+    std::size_t found = disas->find(str2);
+    if (found!=std::string::npos)
+    {
+        cout<<hex<<addr<<": "<<*disas<<endl;
+    }
+    /* 
+    if(has_taint)
+    {
+        cout<<hex<<addr<<": "<<*disas<<endl;
+    }
+    */
     if ((log_all || has_taint) && log_addr) {
 
         /* This instruction is tainted, or we're logging all
@@ -1246,7 +1261,7 @@ VOID AppendBuffer(ADDRINT addr,
         // Now, fill in the buffer with information
 
         assert (g_bufidx < BUFFER_SIZE);
-
+        //cout << "addr: "<<hex<<addr<<endl;
         g_buffer[g_bufidx].addr = addr;
         g_buffer[g_bufidx].tid = tid;
         g_buffer[g_bufidx].insn_length = insn_length;
@@ -1832,6 +1847,7 @@ VOID InstrBlock(BBL bbl)
 
         INS_InsertCall(ins, IPOINT_BEFORE,
                        (AFUNPTR) AppendBuffer,
+                       IARG_PTR, new string(INS_Disassemble(ins)), //long debug
                        IARG_IARGLIST, arglist,
                        IARG_END);
 

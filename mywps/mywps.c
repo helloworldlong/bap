@@ -15,6 +15,11 @@ int main(int argc, char **argv)
   fd = open(argv[1], O_RDONLY);
   read(fd, buff, 256);
   close(fd);
+  if(strcmp(buff,"lon\n")==0)
+{
+  printf("long\n");
+  return 1;
+}
   if (buff[0] != 'a')
 {
 printf("Bad boy:a\n");
@@ -40,6 +45,7 @@ return 1;
 printf("Bad boy:e\n");
 return 1;
 }
+
   printf("Good boy\n");
   return 0;
 }
