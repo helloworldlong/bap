@@ -1203,19 +1203,17 @@ VOID AppendBuffer(string *disas,
     bool has_taint = tracker->hasTaint(ti->delta);
     //long debug
     std::string str2 ("cmov");
-
-    // different member versions of find in the same order as above:
     std::size_t found = disas->find(str2);
     if (found!=std::string::npos)
     {
         cout<<hex<<addr<<": "<<*disas<<endl;
     }
-    /* 
+     
     if(has_taint)
     {
-        cout<<hex<<addr<<": "<<*disas<<endl;
+        cout<<"taint "<<hex<<addr<<": "<<*disas<<endl;
     }
-    */
+    ///////////////////////////
     if ((log_all || has_taint) && log_addr) {
 
         /* This instruction is tainted, or we're logging all
