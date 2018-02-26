@@ -1,0 +1,105 @@
+Dump of assembler code for function main:
+   0x0804855d <+0>:	push   ebp
+   0x0804855e <+1>:	mov    ebp,esp
+   0x08048560 <+3>:	push   edi
+   0x08048561 <+4>:	push   esi
+   0x08048562 <+5>:	push   ebx
+   0x08048563 <+6>:	and    esp,0xfffffff0
+   0x08048566 <+9>:	sub    esp,0x120
+   0x0804856c <+15>:	mov    eax,DWORD PTR [ebp+0xc]
+   0x0804856f <+18>:	mov    DWORD PTR [esp+0xc],eax
+   0x08048573 <+22>:	mov    eax,gs:0x14
+   0x08048579 <+28>:	mov    DWORD PTR [esp+0x11c],eax
+   0x08048580 <+35>:	xor    eax,eax
+   0x08048582 <+37>:	lea    ebx,[esp+0x18]
+   0x08048586 <+41>:	mov    eax,0x0
+   0x0804858b <+46>:	mov    edx,0x41
+   0x08048590 <+51>:	mov    edi,ebx
+   0x08048592 <+53>:	mov    ecx,edx
+   0x08048594 <+55>:	rep stos DWORD PTR es:[edi],eax
+   0x08048596 <+57>:	mov    eax,DWORD PTR [esp+0xc]
+   0x0804859a <+61>:	add    eax,0x4
+   0x0804859d <+64>:	mov    edx,DWORD PTR [eax]
+   0x0804859f <+66>:	mov    eax,DWORD PTR [esp+0xc]
+   0x080485a3 <+70>:	mov    eax,DWORD PTR [eax]
+   0x080485a5 <+72>:	mov    DWORD PTR [esp+0x8],edx
+   0x080485a9 <+76>:	mov    DWORD PTR [esp+0x4],eax
+   0x080485ad <+80>:	mov    DWORD PTR [esp],0x8048780
+   0x080485b4 <+87>:	call   0x80483f0 <printf@plt>
+   0x080485b9 <+92>:	mov    eax,DWORD PTR [esp+0xc]
+   0x080485bd <+96>:	add    eax,0x4
+   0x080485c0 <+99>:	mov    eax,DWORD PTR [eax]
+   0x080485c2 <+101>:	mov    DWORD PTR [esp+0x4],0x0
+   0x080485ca <+109>:	mov    DWORD PTR [esp],eax
+   0x080485cd <+112>:	call   0x8048430 <open@plt>
+   0x080485d2 <+117>:	mov    DWORD PTR [esp+0x14],eax
+   0x080485d6 <+121>:	mov    DWORD PTR [esp+0x8],0x100
+   0x080485de <+129>:	lea    eax,[esp+0x18]
+   0x080485e2 <+133>:	mov    DWORD PTR [esp+0x4],eax
+   0x080485e6 <+137>:	mov    eax,DWORD PTR [esp+0x14]
+   0x080485ea <+141>:	mov    DWORD PTR [esp],eax
+   0x080485ed <+144>:	call   0x80483e0 <read@plt>
+   0x080485f2 <+149>:	mov    eax,DWORD PTR [esp+0x14]
+   0x080485f6 <+153>:	mov    DWORD PTR [esp],eax
+   0x080485f9 <+156>:	call   0x8048450 <close@plt>
+   0x080485fe <+161>:	mov    DWORD PTR [esp+0x4],0x8048787
+   0x08048606 <+169>:	lea    eax,[esp+0x18]
+   0x0804860a <+173>:	mov    DWORD PTR [esp],eax
+   0x0804860d <+176>:	call   0x80483d0 <strcmp@plt>
+   0x08048612 <+181>:	test   eax,eax
+   0x08048614 <+183>:	jne    0x804862c <main+207>
+   0x08048616 <+185>:	mov    DWORD PTR [esp],0x804878c
+   0x0804861d <+192>:	call   0x8048410 <puts@plt>
+   0x08048622 <+197>:	mov    eax,0x1
+   0x08048627 <+202>:	jmp    0x80486cc <main+367>
+   0x0804862c <+207>:	movzx  eax,BYTE PTR [esp+0x18]
+   0x08048631 <+212>:	cmp    al,0x61
+   0x08048633 <+214>:	je     0x804864b <main+238>
+   0x08048635 <+216>:	mov    DWORD PTR [esp],0x8048791
+   0x0804863c <+223>:	call   0x8048410 <puts@plt>
+   0x08048641 <+228>:	mov    eax,0x1
+   0x08048646 <+233>:	jmp    0x80486cc <main+367>
+   0x0804864b <+238>:	movzx  eax,BYTE PTR [esp+0x19]
+   0x08048650 <+243>:	cmp    al,0x62
+   0x08048652 <+245>:	je     0x8048667 <main+266>
+   0x08048654 <+247>:	mov    DWORD PTR [esp],0x804879b
+   0x0804865b <+254>:	call   0x8048410 <puts@plt>
+   0x08048660 <+259>:	mov    eax,0x1
+   0x08048665 <+264>:	jmp    0x80486cc <main+367>
+   0x08048667 <+266>:	movzx  eax,BYTE PTR [esp+0x1a]
+   0x0804866c <+271>:	cmp    al,0x63
+   0x0804866e <+273>:	je     0x8048683 <main+294>
+   0x08048670 <+275>:	mov    DWORD PTR [esp],0x80487a5
+   0x08048677 <+282>:	call   0x8048410 <puts@plt>
+   0x0804867c <+287>:	mov    eax,0x1
+   0x08048681 <+292>:	jmp    0x80486cc <main+367>
+   0x08048683 <+294>:	movzx  eax,BYTE PTR [esp+0x1b]
+   0x08048688 <+299>:	cmp    al,0x64
+   0x0804868a <+301>:	je     0x804869f <main+322>
+   0x0804868c <+303>:	mov    DWORD PTR [esp],0x80487af
+   0x08048693 <+310>:	call   0x8048410 <puts@plt>
+   0x08048698 <+315>:	mov    eax,0x1
+   0x0804869d <+320>:	jmp    0x80486cc <main+367>
+   0x0804869f <+322>:	movzx  eax,BYTE PTR [esp+0x1c]
+   0x080486a4 <+327>:	cmp    al,0x65
+   0x080486a6 <+329>:	je     0x80486bb <main+350>
+   0x080486a8 <+331>:	mov    DWORD PTR [esp],0x80487b9
+   0x080486af <+338>:	call   0x8048410 <puts@plt>
+   0x080486b4 <+343>:	mov    eax,0x1
+   0x080486b9 <+348>:	jmp    0x80486cc <main+367>
+   0x080486bb <+350>:	mov    DWORD PTR [esp],0x80487c3
+   0x080486c2 <+357>:	call   0x8048410 <puts@plt>
+   0x080486c7 <+362>:	mov    eax,0x0
+   0x080486cc <+367>:	mov    esi,DWORD PTR [esp+0x11c]
+   0x080486d3 <+374>:	xor    esi,DWORD PTR gs:0x14
+   0x080486da <+381>:	je     0x80486e1 <main+388>
+   0x080486dc <+383>:	call   0x8048400 <__stack_chk_fail@plt>
+   0x080486e1 <+388>:	lea    esp,[ebp-0xc]
+   0x080486e4 <+391>:	pop    ebx
+   0x080486e5 <+392>:	pop    esi
+   0x080486e6 <+393>:	pop    edi
+   0x080486e7 <+394>:	pop    ebp
+   0x080486e8 <+395>:	ret    
+End of assembler dump.
+Breakpoint 1 at 0x804860d: file mywps.c, line 18.
+Starting program: /home/l/bap/mywps/mywps 22.txt 

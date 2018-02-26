@@ -1202,17 +1202,25 @@ VOID AppendBuffer(string *disas,
 
     bool has_taint = tracker->hasTaint(ti->delta);
     //long debug
+    //log specific instruction
+    /*
     std::string str2 ("cmov");
     std::size_t found = disas->find(str2);
     if (found!=std::string::npos)
     {
         cout<<hex<<addr<<": "<<*disas<<endl;
     }
+    */
      
     if(has_taint)
     {
         cout<<"taint "<<hex<<addr<<": "<<*disas<<endl;
     }
+    if(isBranch)
+    {
+        cout<<"branch "<<hex<<addr<<": "<<*disas<<endl;
+    }
+
     ///////////////////////////
     if ((log_all || has_taint) && log_addr) {
 
