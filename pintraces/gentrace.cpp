@@ -1211,7 +1211,7 @@ VOID AppendBuffer(string *disas,
         cout<<hex<<addr<<": "<<*disas<<endl;
     }
     */
-     
+    /*
     if(has_taint)
     {
         cout<<"taint "<<hex<<addr<<": "<<*disas<<endl;
@@ -1220,7 +1220,7 @@ VOID AppendBuffer(string *disas,
     {
         cout<<"branch "<<hex<<addr<<": "<<*disas<<endl;
     }
-
+    */
     ///////////////////////////
     if ((log_all || has_taint) && log_addr) {
 
