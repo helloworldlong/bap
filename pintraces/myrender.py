@@ -6,7 +6,7 @@ import os
 import time
 #run_base_addr=0
 g_new_num=2
-
+mysql_server_ip='172.16.155.1' #mac vmnet ip
 def color_trace(old_sample_num):
     #global run_base_addr
     first_line=1
@@ -39,7 +39,7 @@ def color_trace(old_sample_num):
     return run_base_addr
     
 def get_sample_num():#return sample_num
-    db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
+    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     sql_cmd='select sample_num from sample where status=1 order by sample_num;'
     cursor.execute(sql_cmd)
@@ -47,7 +47,7 @@ def get_sample_num():#return sample_num
     db.close()
     return data
 def set_sample_status(sample_num):
-    db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
+    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     #update sample table
     sql_cmd='update sample set status=2 where sample_num=%d' %(sample_num)
@@ -59,7 +59,7 @@ def set_sample_status(sample_num):
 def insert_task(run_base_addr,old_sample_num):
     global g_new_num
     # get the convert_addr
-    db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
+    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     trace_file_name='%d-addrs1.txt'%old_sample_num
     while(os.path.exists(trace_file_name)==False):

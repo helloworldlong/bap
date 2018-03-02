@@ -2,9 +2,9 @@
 # -*- coding: UTF-8 -*-
 
 import MySQLdb
-
+mysql_server_ip='172.16.155.1' #mac vmnet ip
 # connect the remote mysql
-db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
+db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
 
 # 
 cursor = db.cursor()

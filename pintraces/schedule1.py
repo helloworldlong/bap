@@ -8,7 +8,7 @@ import MySQLdb
 import time
 base_addr=0
 high_addr=0
-
+mysql_server_ip='172.16.155.1' #mac vmnet ip
 #/home/l/bap/pin/pin -t /home/l/bap/pintraces/obj-ia32/gentrace.so -taint-offsets 0x1 -taint-offsets 6 -o 1-1 -log-limit 10000 -ins-limit 1000000 -c "mywps"  -taint-files 1.txt -- /home/l/bap/mywps/mywps /home/l/bap/mywps/1.txt
 def run_pin_cmd(old_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name):
     
@@ -41,7 +41,10 @@ def convert_path(old_sample_num,convert_addr):#int
     for line in file_lines:
         if (line.find("label pc_0x")!=-1 ):
             line_pos=line.find("label pc_0x")+len("label pc_0x")
-            myaddr=int(line[line_pos:],16) # absolute address
+            if(len(line)<=19):
+                myaddr=int(line[line_pos:],16) # absolute address
+            else:
+                myaddr=int(line[line.find('_',0)+1:line.find('_',18)],16)
             #print 'myaddr %x'%myaddr
             #print 'convert_addr %x'%convert_addr
             if(myaddr==convert_addr):
@@ -76,7 +79,7 @@ def make_sample(old_sample_num,new_sample_num,suffix_name,convert_addr): #int in
     print "[*] make_sample  cmd: ", make_sample_cmd
     os.system(make_sample_cmd)
 def get_task():
-    db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
+    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     sql_cmd='select * from task where done=0;'
     cursor.execute(sql_cmd)
@@ -86,7 +89,7 @@ def get_task():
     db.close()
     return data
 def get_sample_num():#return sample_num
-    db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
+    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     sql_cmd='select sample_num from sample where status=0 order by sample_num;'
     cursor.execute(sql_cmd)
@@ -94,7 +97,7 @@ def get_sample_num():#return sample_num
     db.close()
     return data
 def set_sample_status(sample_num):
-    db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
+    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     #update sample table
     sql_cmd='update sample set status=1 where sample_num=%d' %(sample_num)
@@ -102,7 +105,7 @@ def set_sample_status(sample_num):
     db.commit()
     db.close()
 def get_task_data():#return sample_num
-    db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
+    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     sql_cmd='select old_sample_num,new_sample_num,convert_address from task where status=0 order by convert_address;'
     cursor.execute(sql_cmd)
@@ -113,7 +116,7 @@ def get_task_data():#return sample_num
     return data
    
 def set_task_status(old_sample_num,new_sample_num,convert_addr):
-    db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
+    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     sql_cmd='update task set status=1 where (old_sample_num=%d and new_sample_num=%d) and convert_address=%d;' %(old_sample_num,new_sample_num,convert_addr)
     #print sql_cmd
@@ -121,7 +124,7 @@ def set_task_status(old_sample_num,new_sample_num,convert_addr):
     db.commit()
     db.close()
 def set_task_status_1(old_sample_num,new_sample_num,convert_addr):
-    db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
+    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     sql_cmd='update task set status=3 where (old_sample_num=%d and new_sample_num=%d) and convert_address=%d;' %(old_sample_num,new_sample_num,convert_addr)
     #print sql_cmd
@@ -168,7 +171,7 @@ def get_taint_branch(old_sample_num,base_addr,high_addr):
         f_o.write(hex(addr)+'\n')
     f_o.close()
 def insert_sample(sample_num):
-    db = MySQLdb.connect("192.168.178.1","root","123456","bap" )
+    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     sql_cmd='insert ignore into sample(sample_num,status) values('+str(sample_num)+','+str(0)+');'
     cursor.execute(sql_cmd)
