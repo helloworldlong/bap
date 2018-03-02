@@ -9,44 +9,65 @@
 int main(int argc, char **argv)
 {
   int  fd;
+  int flag=0;
   char  buff[260] = {0};
   //fd = open("serial.txt", O_RDONLY);
   printf("%s\n%s\n", argv[0], argv[1]);
   fd = open(argv[1], O_RDONLY);
   read(fd, buff, 256);
   close(fd);
+  /*
   if(strcmp(buff,"lon\n")==0)
 {
   printf("long\n");
   return 1;
-}
-  if (buff[0] != 'a')
+}*/
+  if (buff[0] == 'a')
 {
-printf("Bad boy:a\n");
-return 1;
+  printf("buffer[0] is a\n");
+  if (buff[1] == 'b') 
+  {
+    printf("buffer[1] is b\n");
+    if (buff[2] == 'c')
+    {
+      printf("buffer[2] is c\n");
+      if (buff[3] == 'd')
+      {
+        printf("buffer[3] is d\n");
+        if (buff[4] == 'e')
+        {
+          printf("buffer[4] is e\n");
+          flag= 1;
+        }
+        else
+        {
+          printf("buffer[4] is not e\n");
+        }
+      }
+      else
+      {
+        printf("buffer[3] is not d\n");
+      }
+    }
+    else
+    {
+      printf("buffer[2] is not c\n");
+    }
+  }
+  else
+  {
+    printf("buffer[1] is not b\n");
+  }
 }
-  if (buff[1] != 'b') 
+else
 {
-printf("Bad boy:b\n");
-return 1;
+  printf("buffer[0] is not a\n");
 }
-  if (buff[2] != 'c')
-{
-printf("Bad boy:c\n");
-return 1;
-}
-  if (buff[3] != 'd')
-{
-printf("Bad boy:d\n");
-return 1;
-}
-  if (buff[4] != 'e')
-{
-printf("Bad boy:e\n");
-return 1;
-}
-
-  printf("Good boy\n");
+  if(flag==1)
+  {
+    printf("control flow\n");
+  }
+  
   return 0;
 }
 
