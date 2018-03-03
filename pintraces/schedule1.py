@@ -29,7 +29,7 @@ def lift_il(old_sample_num):#int
     print "[*] iltrans il cmd: ", iltrans_cmd
     os.system(iltrans_cmd)
 
-def convert_path(old_sample_num,convert_addr):#int
+def convert_path(old_sample_num,convert_addr,convert_serial_num):#int
     #give the convert address(int)
     print "[*] convert_path addr: ", hex(convert_addr)
     #convert_addr=base_addr+convert_addr
@@ -38,6 +38,7 @@ def convert_path(old_sample_num,convert_addr):#int
     f_il.close()
     file_line_num=0
     find_convert_line=0
+    tmp_serial_num=0
     for line in file_lines:
         if (line.find("label pc_0x")!=-1 ):
             line_pos=line.find("label pc_0x")+len("label pc_0x")
@@ -48,6 +49,8 @@ def convert_path(old_sample_num,convert_addr):#int
             #print 'myaddr %x'%myaddr
             #print 'convert_addr %x'%convert_addr
             if(myaddr==convert_addr):
+                tmp_serial_num=tmp_serial_num+1
+            if(tmp_serial_num==convert_serial_num):
                 convert_line=file_lines[file_line_num+1]
                 if(convert_line.find('assert')!=-1):
                     file_lines[file_line_num+1]='assert ~('+convert_line[7:-1]+')'+'\n'
@@ -107,7 +110,7 @@ def set_sample_status(sample_num):
 def get_task_data():#return sample_num
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
-    sql_cmd='select old_sample_num,new_sample_num,convert_address from task where status=0 order by convert_address;'
+    sql_cmd='select old_sample_num,new_sample_num,convert_address,convert_serial_num from task where status=0 order by convert_address;'
     cursor.execute(sql_cmd)
     data = cursor.fetchone()
     db.close()
@@ -115,18 +118,18 @@ def get_task_data():#return sample_num
     #print type(data)
     return data
    
-def set_task_status(old_sample_num,new_sample_num,convert_addr):
+def set_task_status(old_sample_num,new_sample_num,convert_addr,convert_serial_num):
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
-    sql_cmd='update task set status=1 where (old_sample_num=%d and new_sample_num=%d) and convert_address=%d;' %(old_sample_num,new_sample_num,convert_addr)
+    sql_cmd='update task set status=1 where old_sample_num=%d and new_sample_num=%d  and convert_address=%d and convert_serial_num=%d;' %(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
     #print sql_cmd
     cursor.execute(sql_cmd)
     db.commit()
     db.close()
-def set_task_status_1(old_sample_num,new_sample_num,convert_addr):
+def set_task_status_1(old_sample_num,new_sample_num,convert_addr,convert_serial_num):
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
-    sql_cmd='update task set status=3 where (old_sample_num=%d and new_sample_num=%d) and convert_address=%d;' %(old_sample_num,new_sample_num,convert_addr)
+    sql_cmd='update task set status=3 where old_sample_num=%d and new_sample_num=%d and convert_address=%d and convert_serial_num=%d;' %(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
     #print sql_cmd
     cursor.execute(sql_cmd)
     db.commit()
@@ -177,9 +180,9 @@ def insert_sample(sample_num):
     cursor.execute(sql_cmd)
     db.commit()
     db.close()
-def bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr):
+def bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr,convert_serial_num):
     global base_addr,high_addr
-    convert_path(old_sample_num,convert_addr)  #0804862C          
+    convert_path(old_sample_num,convert_addr,convert_serial_num)  #0804862C          
     il_f(old_sample_num,convert_addr)
     stp_solve(old_sample_num,convert_addr)
     make_sample(old_sample_num,new_sample_num,suffix_name,convert_addr)
@@ -219,11 +222,12 @@ def main():
         old_sample_num=task_tuple[0]
         new_sample_num=task_tuple[1]
         convert_addr=task_tuple[2]
-        set_task_status_1(old_sample_num,new_sample_num,convert_addr) #occupy
+        convert_serial_num=task_tuple[3]
+        set_task_status_1(old_sample_num,new_sample_num,convert_addr,convert_serial_num) #occupy
         base_addr,high_addr=get_base_addr(old_sample_num)
-        bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr+base_addr)
+        bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr+base_addr,convert_serial_num)
         task_tuple=None
-        set_task_status(old_sample_num,new_sample_num,convert_addr)
+        set_task_status(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
 
             
 
