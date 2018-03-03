@@ -67,14 +67,16 @@ def insert_task(run_base_addr,old_sample_num):
     f_taint = open(trace_file_name,'r')
     print str(old_sample_num)+' run_base_addr: '+hex(run_base_addr)
     for line in f_taint.readlines():
-        convert_addr=int(line,16)-run_base_addr
-        print hex(convert_addr)
-        sql_cmd='insert ignore into task(old_sample_num,new_sample_num,convert_address,status) values('+str(old_sample_num)+','+str(g_new_num)+','+str(convert_addr)+','+str(0)+');'
-        
-        mm=cursor.execute(sql_cmd)
-        if(mm):
-            g_new_num=g_new_num+1
-        db.commit()
+        convert_addr=int(line.split()[0],16)-run_base_addr
+        tmp_count=int(line.split()[1],10)
+        #convert_addr=int(line,16)-run_base_addr
+        print hex(convert_addr),str(tmp_count)
+        for i in range(0,tmp_count):
+            sql_cmd='insert ignore into task(old_sample_num,new_sample_num,convert_address,convert_serial_num,status) values('+str(old_sample_num)+','+str(g_new_num)+','+str(convert_addr)+','+str(i)+','+str(0)+');'
+            mm=cursor.execute(sql_cmd)
+            if(mm):
+                g_new_num=g_new_num+1
+            db.commit()
     f_taint.close()
     db.close()
 
