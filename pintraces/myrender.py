@@ -71,7 +71,7 @@ def insert_task(run_base_addr,old_sample_num):
         tmp_count=int(line.split()[1],10)
         #convert_addr=int(line,16)-run_base_addr
         print hex(convert_addr),str(tmp_count)
-        for i in range(0,tmp_count):
+        for i in range(1,tmp_count+1):
             sql_cmd='insert ignore into task(old_sample_num,new_sample_num,convert_address,convert_serial_num,status) values('+str(old_sample_num)+','+str(g_new_num)+','+str(convert_addr)+','+str(i)+','+str(0)+');'
             mm=cursor.execute(sql_cmd)
             if(mm):
