@@ -37,7 +37,8 @@ int main(int argc, char **argv)
   read(fd, buff, 256);
   close(fd);
   int a=*(int*)buff;
-  int b=*(int*)(buff+4);
+  //int b=*(int*)(buff+4);
+  int b=22;
   if(cmpint(a,b)==1)
   {
     printf("a:%x>b:%x\n",a,b);

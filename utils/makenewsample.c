@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 	}	
 
  	FILE* fpo = fopen(argv[3], "rb");
-	printf("old sample %s\n",argv[2]);
+	//printf("old sample %s\n",argv[2]);
 	if(fpo == NULL) 
 	{
 		printf("can't open old sample file\n");
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 	//sovled failed, make a NULL new sample
 	if(IsSovledSuccess == 0)
 	{
-		FILE* fp = fopen(argv[4],"w+");
+		FILE* fp = fopen(argv[4],"w");
 		fclose(fp);
 		printf("failed!\n");
 	}
