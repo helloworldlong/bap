@@ -16,6 +16,16 @@ int mystrcmp(const char *dest, const char *source)
    return *dest - *source;  
   
 }  
+int cmpint(int a, int b)
+{
+  if(a>b)
+  {
+    return 1;
+  }
+  else{
+    return 0;
+  }
+}
 int main(int argc, char **argv)
 {
   int  fd;
@@ -26,7 +36,16 @@ int main(int argc, char **argv)
   fd = open(argv[1], O_RDONLY);
   read(fd, buff, 256);
   close(fd);
-  
+  int a=*(int*)buff;
+  int b=*(int*)(buff+4);
+  if(cmpint(a,b)==1)
+  {
+    printf("a:%x>b:%x\n",a,b);
+  }
+  else{
+    printf("a:%x<b:%x\n",a,b);
+  }
+  /*
   if(mystrcmp(buff,"lon\n")==0)
 {
   printf("long\n");
@@ -35,6 +54,7 @@ int main(int argc, char **argv)
 else{
   printf("nocmp\n");
 }
+*/
 /*
   if (buff[0] == 'a')
 {
