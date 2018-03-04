@@ -36,9 +36,10 @@ int main(int argc, char **argv)
   fd = open(argv[1], O_RDONLY);
   read(fd, buff, 256);
   close(fd);
+  //twice cmpint
+  /*
   int a=*(int*)buff;
   int b=*(int*)(buff+4);
-  //int b=22;
   if(cmpint(a,22)==1)
   {
     printf("a:%x>22\n",a);
@@ -50,16 +51,17 @@ int main(int argc, char **argv)
     }
     printf("a:%x<22\n",a);
   }
-  /*
-  if(mystrcmp(buff,"lon\n")==0)
-{
-  printf("long\n");
-  return 1;
-}
-else{
-  printf("nocmp\n");
-}
-*/
+  */
+  //mystrcmp while condition
+  
+  if(mystrcmp(buff,"bbc\n")==0)
+  {
+    printf("ok\n");
+  }
+  else{
+    printf("nook\n");
+  }
+  //simplest condition
 /*
   if (buff[0] == 'a')
 {
