@@ -141,7 +141,7 @@ namespace WINDOWS {
 typedef struct branch_s
 {
   ADDRINT addr;
-  bool taken;
+  //bool taken;
 }branch_st;
 list <branch_st> g_bbls;
 
@@ -1903,13 +1903,13 @@ static bool DoWriteAddr(ADDRINT addr)
 
 
 // maximum size of the buffer.
-ADDRINT WriteJZ(THREADID threadid,ADDRINT addr, string *disas,bool taken)
+ADDRINT WriteJZ(THREADID threadid,ADDRINT addr, string *disas)
 {
 	//PIN_GetLock(&lock, threadid+1);
     count_bbls++ ;
     branch_st tmp_branch;
     tmp_branch.addr = addr;
-    tmp_branch.taken = taken;
+    //tmp_branch.taken = taken;
 	g_bbls.push_back(tmp_branch);
     //cout <<  std::hex  << addr+DllbaseAddress <<" : "<<*disas<<endl; 
     if(count_bbls>1024)
@@ -1917,7 +1917,7 @@ ADDRINT WriteJZ(THREADID threadid,ADDRINT addr, string *disas,bool taken)
         list<branch_st>::iterator iter;
         for(iter=g_bbls.begin();iter!=g_bbls.end();++iter)
         { 
-            fpaddrs<<hex<<iter->addr<<" "<<iter->taken<<endl;
+            fpaddrs<<hex<<iter->addr<<endl;
         } 
         g_bbls.clear();     
         count_bbls=0;
@@ -1941,13 +1941,13 @@ VOID InstrTrace(TRACE trace, VOID *v)
             if(bwriteaddr)
 			{
                 INS MyInsTail=BBL_InsTail(bbl);
-                if(INS_Category(MyInsTail) == XED_CATEGORY_COND_BR)
+                if(INS_Category(MyInsTail) == XED_CATEGORY_COND_BR||INS_Category(MyInsTail) ==XED_CATEGORY_UNCOND_BR||INS_Category(MyInsTail) == XED_CATEGORY_CALL||INS_Category(MyInsTail) == XED_CATEGORY_RET)
                 {
                     INS_InsertCall(MyInsTail, IPOINT_BEFORE, AFUNPTR(WriteJZ),
                     IARG_THREAD_ID,
                     IARG_ADDRINT, INS_Address(MyInsTail)-DllbaseAddress,
                     IARG_PTR, new string(INS_Disassemble(MyInsTail)),
-                    IARG_BRANCH_TAKEN,
+                    //IARG_BRANCH_TAKEN,
                     IARG_END);
                 }
                 //ADDRINT tmp=addr-DllbaseAddress;
@@ -2724,7 +2724,7 @@ VOID Cleanup()
         list<branch_st>::iterator iter;
         for(iter=g_bbls.begin();iter!=g_bbls.end();++iter)
         { 
-            fpaddrs<<hex<<iter->addr<<" "<<iter->taken<<endl;
+            fpaddrs<<hex<<iter->addr<<endl;
         } 
         g_bbls.clear();     
         count_bbls=0;

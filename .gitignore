@@ -2,6 +2,7 @@ pintraces/*.txt
 pintraces/*.il
 pintraces/*.s
 pintraces/*.f
+.vscode/*
 peda*
 mywps/.gdb_history
 *.a

@@ -14,10 +14,6 @@ def color_trace(old_sample_num):
     mybase_addr = get_imagebase()
     # read trace file
     trace_file_name='%d-addrs.txt'%old_sample_num
-    while(os.path.exists(trace_file_name)==False):
-        print 'sleep'
-        time.sleep(2)
-    time.sleep(1)
     f_trace = open(trace_file_name,'r')
     for line in f_trace.readlines():
         #get trace address list
@@ -27,12 +23,8 @@ def color_trace(old_sample_num):
             print hex(run_base_addr)
             first_line=0
             continue
-        tmp_addr=int(line.split()[0],16)+mybase_addr
-        tmp_taken=int(line.split()[1],10)
-        if(tmp_taken==1):
-            mycolor=old_sample_num|0x80000000  
-        else:
-            mycolor=old_sample_num   
+        tmp_addr=int(line,16)+mybase_addr
+        mycolor=old_sample_num   
         print hex(tmp_addr)+' '+hex(mycolor)  
         set_color(tmp_addr,CIC_ITEM,mycolor)
     f_trace.close()
