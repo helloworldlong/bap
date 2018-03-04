@@ -49,6 +49,7 @@ def convert_path(old_sample_num,convert_addr,convert_serial_num):#int
             #print 'myaddr %x'%myaddr
             #print 'convert_addr %x'%convert_addr
             if(myaddr==convert_addr):
+                print 'find'
                 tmp_serial_num=tmp_serial_num+1
             if(tmp_serial_num==convert_serial_num):
                 convert_line=file_lines[file_line_num+1]
@@ -63,8 +64,13 @@ def convert_path(old_sample_num,convert_addr,convert_serial_num):#int
         file_line_num=file_line_num+1
     if(find_convert_line==1):
         f_il_c=open(str(old_sample_num)+'-4'+hex(convert_addr)+'.il','w')
+        tmp_line_num=0
         for line in file_lines:
-            f_il_c.write(line)
+            if(tmp_line_num<=file_line_num+1):
+                f_il_c.write(line)
+            else:
+                break
+            tmp_line_num=tmp_line_num+1
         f_il_c.close()
     else:
         print 'convert fail'
@@ -233,6 +239,7 @@ def main():
 
     
 main()
+#convert_path(1,0x804854f,1)
 
             
 

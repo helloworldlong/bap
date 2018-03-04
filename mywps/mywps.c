@@ -18,7 +18,7 @@ int mystrcmp(const char *dest, const char *source)
 }  
 int cmpint(int a, int b)
 {
-  if(a>b)
+  if(a==b)
   {
     return 1;
   }

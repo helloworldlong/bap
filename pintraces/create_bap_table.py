@@ -19,7 +19,7 @@ sql = """CREATE TABLE task (
          convert_address INT,
          convert_serial_num INT,
          status INT,
-         PRIMARY KEY (convert_address)
+         PRIMARY KEY (convert_address,convert_serial_num)
           )"""
 
 cursor.execute(sql)

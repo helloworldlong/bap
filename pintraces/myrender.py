@@ -62,8 +62,8 @@ def insert_task(run_base_addr,old_sample_num):
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     trace_file_name='%d-addrs1.txt'%old_sample_num
-    while(os.path.exists(trace_file_name)==False):
-        time.sleep(2)
+    #while(os.path.exists(trace_file_name)==False):
+    #    time.sleep(2)
     f_taint = open(trace_file_name,'r')
     print str(old_sample_num)+' run_base_addr: '+hex(run_base_addr)
     for line in f_taint.readlines():
