@@ -18,7 +18,7 @@ int mystrcmp(const char *dest, const char *source)
 }  
 int cmpint(int a, int b)
 {
-  if(a==b)
+  if(a>b)
   {
     return 1;
   }
@@ -37,14 +37,18 @@ int main(int argc, char **argv)
   read(fd, buff, 256);
   close(fd);
   int a=*(int*)buff;
-  //int b=*(int*)(buff+4);
-  int b=22;
-  if(cmpint(a,b)==1)
+  int b=*(int*)(buff+4);
+  //int b=22;
+  if(cmpint(a,22)==1)
   {
-    printf("a:%x>b:%x\n",a,b);
+    printf("a:%x>22\n",a);
   }
   else{
-    printf("a:%x<b:%x\n",a,b);
+    if(cmpint(b,22))
+    {
+      printf("b:%x>22\n",b);
+    }
+    printf("a:%x<22\n",a);
   }
   /*
   if(mystrcmp(buff,"lon\n")==0)
