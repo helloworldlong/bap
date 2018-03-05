@@ -18,6 +18,7 @@ sql = """CREATE TABLE task (
          new_sample_num  INT,
          convert_address INT,
          convert_serial_num INT,
+         line_num INT,
          status INT,
          PRIMARY KEY (convert_address,convert_serial_num)
           )"""

@@ -8,9 +8,9 @@ sql = """CREATE TABLE task (
          old_sample_num  INT,
          new_sample_num  INT,
          convert_address INT,
-         convert_serial_num INT,
+         line_num INT,
          status INT,
-         PRIMARY KEY (convert_address,convert_serial_num)
+         PRIMARY KEY (convert_address,line_num)
           )"""
 
 sql = """CREATE TABLE sample (
@@ -27,15 +27,14 @@ schedule.py
 1）获取sample表中status为0的sample_num
 2) set_sample_status_3设置状态为3占有
 3）bap_cmd_first运行pintrace，获取中间语言和trace
-4）set_sample_status_1(sample_num)设置状态为1完成
+4）get_taint_branch获取il文件中，行号和assert翻转点地址,和翻转点序号（assert翻转点地址,和翻转点序号为主键）
+5）set_sample_status_1(sample_num)设置状态为1完成
 5）还没有考虑失败的情况
 2. idapython myrender.py
 1）获取get_sample_num()即status=1为sample_num
 2）set_sample_status_2(sample_num)设置状态2，标志完成，因为是最终状态，且为中心结构，所以不用占用状态
 3）color_trace(sample_num)根据addrs.txt对bbl进行着色，颜色为序号
-4）insert_task(run_base_addr,sample_num)根据addrs1.txt插入task，status=0
-5）目前按照 PRIMARY KEY (convert_address,convert_serial_num)有过的翻转就不要了，插入不进去，对于循环测试ok
-6）可否，去除父亲之前的翻转点？
+4)  考虑到全局序号的问题，从addrs1.txt改为直接插入表格task，convert_addr,line_num,status=0    PRIMARY KEY (convert_address,convert_serial_num)有过的翻转就不要了，插入不进去
 3. schedule1.py
 1）get_task_data()获取task，status=0的task
 2）set_task_status_3设置占用状态3
@@ -47,7 +46,9 @@ stp_success=stp_solve(old_sample_num,convert_addr)
         return 1
 即求解成功的话，生成新的样本，然后插入新的样本到sample表格，status为0
 新的样本会被schedule.py重新运行。
-4）if(second_success==1):
+4) convert_path函数
+修改，写入
+5）if(second_success==1):
             set_task_status_1 成功
         else:
             set_task_status_2 失败

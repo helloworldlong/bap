@@ -29,44 +29,30 @@ def lift_il(old_sample_num):#int
     print "[*] iltrans il cmd: ", iltrans_cmd
     os.system(iltrans_cmd)
 
-def convert_path(old_sample_num,convert_addr,convert_serial_num):#int
+def convert_path(old_sample_num,convert_addr,line_num):#int
     #give the convert address(int)
-    print "[*] convert_path addr: ", hex(convert_addr)
-    #convert_addr=base_addr+convert_addr
+    print "[*] convert_path addr: "+hex(convert_addr)+' '+str(line_num)
     f_il=open(str(old_sample_num)+'-3.il','r')
     file_lines=f_il.readlines()
     f_il.close()
-    file_line_num=0
     find_convert_line=0
-    tmp_serial_num=0
-    for line in file_lines:
-        if (line.find("label pc_0x")!=-1 ):
-            line_pos=line.find("label pc_0x")+len("label pc_0x")
-            if(len(line)<=19):
-                myaddr=int(line[line_pos:],16) # absolute address
-            else:
-                myaddr=int(line[line.find('_',0)+1:line.find('_',18)],16)
-            #print 'myaddr %x'%myaddr
-            #print 'convert_addr %x'%convert_addr
-            if(myaddr==convert_addr):
-                print 'find'
-                tmp_serial_num=tmp_serial_num+1
-            if(tmp_serial_num==convert_serial_num):
-                convert_line=file_lines[file_line_num+1]
-                if(convert_line.find('assert')!=-1):
-                    file_lines[file_line_num+1]='assert ~('+convert_line[7:-1]+')'+'\n'
-                    find_convert_line=1
-                    print 'find convert line',str(file_line_num)
-                    break # now only the first
-                else:
-                    print 'error assert'
-                    exit()   
-        file_line_num=file_line_num+1
+          
+    convert_line=file_lines[line_num-1]
+    if(convert_line.find('assert')!=-1):
+        file_lines[line_num-1]='assert ~('+convert_line[7:-1]+')'+'\n'
+        find_convert_line=1
+        print 'find convert line',str(line_num)
+        
+    else:
+        print 'error assert'
+        exit()  
+     
+        
     if(find_convert_line==1):
-        f_il_c=open(str(old_sample_num)+'-4'+hex(convert_addr)+'.il','w')
+        f_il_c=open(str(old_sample_num)+'-4_'+hex(convert_addr)+'_'+str(line_num)+'.il','w')
         tmp_line_num=0
         for line in file_lines:
-            if(tmp_line_num<=file_line_num+1):
+            if(tmp_line_num<line_num):
                 f_il_c.write(line)
             else:
                 break
@@ -75,24 +61,29 @@ def convert_path(old_sample_num,convert_addr,convert_serial_num):#int
     else:
         print 'convert fail'
         exit()
-def il_f(old_sample_num,convert_addr):
-    il_f_cmd='topredicate -il '+str(old_sample_num)+'-4'+hex(convert_addr)+'.il'+' -q -noopt -stp-out '+str(old_sample_num)+'-4'+hex(convert_addr)+'.f' 
+def il_f(old_sample_num,convert_addr,line_num):
+    f_il_c=str(old_sample_num)+'-4_'+hex(convert_addr)+'_'+str(line_num)+'.il'
+    f_f=str(old_sample_num)+'-4_'+hex(convert_addr)+'_'+str(line_num)+'.f'
+    il_f_cmd='topredicate -il '+f_il_c+' -q -noopt -stp-out '+f_f
     print "[*] il_f  cmd: ", il_f_cmd   
     os.system(il_f_cmd)
-def stp_solve(old_sample_num,convert_addr):
-    stp_cmd='stp '+str(old_sample_num)+'-4'+hex(convert_addr)+'.f'+' > '+str(old_sample_num)+'-4'+hex(convert_addr)+'.s'
+def stp_solve(old_sample_num,convert_addr,line_num):
+    f_f=str(old_sample_num)+'-4_'+hex(convert_addr)+'_'+str(line_num)+'.f'
+    f_s=str(old_sample_num)+'-4_'+hex(convert_addr)+'_'+str(line_num)+'.s'
+    stp_cmd='stp '+f_f+' > '+f_s
     print "[*] stp  cmd: ", stp_cmd
     os.system(stp_cmd)
-    my_s=str(old_sample_num)+'-4'+hex(convert_addr)+'.s'
-    my_s_file=open(my_s,'r')
+    
+    my_s_file=open(f_s,'r')
     first_line=my_s_file.readline()
     my_s_file.close()
     if(first_line=='Valid.\n'):
         return 0
     else:
         return 1
-def make_sample(old_sample_num,new_sample_num,suffix_name,convert_addr): #int int string
-    make_sample_cmd='makenewsample  '+str(old_sample_num)+'-4'+hex(convert_addr)+'.s '+str(old_sample_num)+'-assist.txt '+ str(old_sample_num)+suffix_name+' '+str(new_sample_num)+suffix_name
+def make_sample(old_sample_num,new_sample_num,suffix_name,convert_addr,line_num): #int int string
+    f_s=str(old_sample_num)+'-4_'+hex(convert_addr)+'_'+str(line_num)+'.s'
+    make_sample_cmd='makenewsample  '+f_s+' '+str(old_sample_num)+'-assist.txt '+ str(old_sample_num)+suffix_name+' '+str(new_sample_num)+suffix_name
     print "[*] make_sample  cmd: ", make_sample_cmd
     os.system(make_sample_cmd)
 def get_task():
@@ -124,7 +115,7 @@ def set_sample_status(sample_num):
 def get_task_data():#return sample_num
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
-    sql_cmd='select old_sample_num,new_sample_num,convert_address,convert_serial_num from task where status=0 order by convert_address;'
+    sql_cmd='select old_sample_num,new_sample_num,convert_address,convert_serial_num,line_num from task where status=0 order by convert_address;'
     cursor.execute(sql_cmd)
     data = cursor.fetchone()
     db.close()
@@ -132,28 +123,28 @@ def get_task_data():#return sample_num
     #print type(data)
     return data
    
-def set_task_status_1(old_sample_num,new_sample_num,convert_addr,convert_serial_num):
+def set_task_status_1(old_sample_num,new_sample_num,convert_addr,convert_serial_num,line_num):
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
-    sql_cmd='update task set status=1 where old_sample_num=%d and new_sample_num=%d  and convert_address=%d and convert_serial_num=%d;' %(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
+    sql_cmd='update task set status=1 where old_sample_num=%d and new_sample_num=%d  and convert_address=%d and convert_serial_num=%d and line_num=%d;' %(old_sample_num,new_sample_num,convert_addr,convert_serial_num,line_num)
     #print sql_cmd
     cursor.execute(sql_cmd)
     db.commit()
     db.close()
 #occupy status
-def set_task_status_3(old_sample_num,new_sample_num,convert_addr,convert_serial_num):
+def set_task_status_3(old_sample_num,new_sample_num,convert_addr,convert_serial_num,line_num):
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
-    sql_cmd='update task set status=3 where old_sample_num=%d and new_sample_num=%d and convert_address=%d and convert_serial_num=%d;' %(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
+    sql_cmd='update task set status=3 where old_sample_num=%d and new_sample_num=%d and convert_address=%d and convert_serial_num=%d and line_num=%d;' %(old_sample_num,new_sample_num,convert_addr,convert_serial_num,line_num)
     #print sql_cmd
     cursor.execute(sql_cmd)
     db.commit()
     db.close()
 #failure status
-def set_task_status_2(old_sample_num,new_sample_num,convert_addr,convert_serial_num):
+def set_task_status_2(old_sample_num,new_sample_num,convert_addr,convert_serial_num,line_num):
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
-    sql_cmd='update task set status=2 where old_sample_num=%d and new_sample_num=%d and convert_address=%d and convert_serial_num=%d;' %(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
+    sql_cmd='update task set status=2 where old_sample_num=%d and new_sample_num=%d and convert_address=%d and convert_serial_num=%d and line_num=%d;' %(old_sample_num,new_sample_num,convert_addr,convert_serial_num,line_num)
     #print sql_cmd
     cursor.execute(sql_cmd)
     db.commit()
@@ -204,13 +195,13 @@ def insert_sample(sample_num):
     cursor.execute(sql_cmd)
     db.commit()
     db.close()
-def bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr,convert_serial_num):
+def bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr,convert_serial_num,line_num):
     global base_addr,high_addr
-    convert_path(old_sample_num,convert_addr,convert_serial_num)  #0804862C          
-    il_f(old_sample_num,convert_addr)
-    stp_success=stp_solve(old_sample_num,convert_addr)
+    convert_path(old_sample_num,convert_addr,line_num)  #0804862C          
+    il_f(old_sample_num,convert_addr,line_num)
+    stp_success=stp_solve(old_sample_num,convert_addr,line_num)
     if(stp_success==1):
-        make_sample(old_sample_num,new_sample_num,suffix_name,convert_addr)
+        make_sample(old_sample_num,new_sample_num,suffix_name,convert_addr,line_num)
         insert_sample(new_sample_num)
         return 1
     else:
@@ -252,15 +243,16 @@ def main():
         new_sample_num=task_tuple[1]
         convert_addr=task_tuple[2]
         convert_serial_num=task_tuple[3]
-        set_task_status_3(old_sample_num,new_sample_num,convert_addr,convert_serial_num) #occupy
+        line_num=task_tuple[4]
+        set_task_status_3(old_sample_num,new_sample_num,convert_addr,convert_serial_num,line_num) #occupy
         base_addr,high_addr=get_base_addr(old_sample_num)
-        second_success=bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr+base_addr,convert_serial_num)
+        second_success=bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr+base_addr,convert_serial_num,line_num)
         task_tuple=None
         if(second_success==1):
-            set_task_status_1(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
+            set_task_status_1(old_sample_num,new_sample_num,convert_addr,convert_serial_num,line_num)
         else:
             # task fails
-            set_task_status_2(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
+            set_task_status_2(old_sample_num,new_sample_num,convert_addr,convert_serial_num,line_num)
 
             
 

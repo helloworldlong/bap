@@ -132,7 +132,7 @@ def set_task_status(old_sample_num,new_sample_num,convert_addr):
     
 def cp_share_folder(old_sample_num):
     os.system('cp %d-addrs.txt /mnt/hgfs/ubuntu14-disk/share/'%old_sample_num)
-    os.system('cp %d-addrs1.txt /mnt/hgfs/ubuntu14-disk/share/'%old_sample_num)
+    #os.system('cp %d-addrs1.txt /mnt/hgfs/ubuntu14-disk/share/'%old_sample_num)
 
 def get_base_addr(old_sample_num):
     filename1='%d-addrs.txt'%old_sample_num
@@ -143,16 +143,16 @@ def get_base_addr(old_sample_num):
     ff.close()
     return base_addr,high_addr
 def get_taint_branch(old_sample_num,base_addr,high_addr):
-    taint_branch=[]
+    taint_branch = dict()
     f_il=open(str(old_sample_num)+'-3.il','r')
     file_lines=f_il.readlines()
     f_il.close()
-    f_o=open('%d-addrs1.txt'%old_sample_num,'w')
-    file_line_num=0 #can not exceed 2^32 lines
+    serial_num=1
+    file_line_num=1 #can not exceed 2^32 lines
     for line in file_lines:
         if (line.find("assert ")!=-1 ) and (line.find("assert true")==-1):
             #print hex(base_addr),hex(high_addr)
-            taint_addr_str=file_lines[file_line_num-1]          
+            taint_addr_str=file_lines[file_line_num-2]          
             if(taint_addr_str.find('label pc_')!=-1):
                 line_pos=taint_addr_str.find("label pc_0x")+len("label pc_0x")
                 if(len(taint_addr_str)<=19):
@@ -162,19 +162,19 @@ def get_taint_branch(old_sample_num,base_addr,high_addr):
                 #myaddr=int(taint_addr_str[line_pos:],16) # absolute address
                 if(myaddr>base_addr and myaddr<high_addr):
                     #print hex(myaddr)
-                    taint_branch.append(myaddr)
+                    taint_branch[file_line_num]=(myaddr,serial_num)
+                    serial_num=serial_num+1
+
             else:
+                print 'taint_addr_str '+taint_addr_str 
+                print file_line_num
                 print 'label error'
                 exit()
         file_line_num=file_line_num+1
-    count_frq = dict()
-    for one in taint_branch:
-        if one in count_frq:
-            count_frq[one] += 1
-        else:
-            count_frq[one] = 1
-    for addr,count in count_frq.items():
-        f_o.write(hex(addr)+' '+str(count)+'\n')
+    
+    f_o=open('%d-addrs1.txt'%old_sample_num,'w')
+    for line_num_1,(convert_addr_1,serial_num_1) in taint_branch.items():
+        f_o.write(str(line_num_1)+' '+str(convert_addr_1)+' '+str(serial_num_1)+'\n')
     f_o.close()
 def insert_sample(sample_num):
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
@@ -237,6 +237,7 @@ def main():
 
     
 main()
+#lift_il(1)
 
             
 
