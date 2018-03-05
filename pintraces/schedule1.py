@@ -132,7 +132,7 @@ def get_task_data():#return sample_num
     #print type(data)
     return data
    
-def set_task_status(old_sample_num,new_sample_num,convert_addr,convert_serial_num):
+def set_task_status_1(old_sample_num,new_sample_num,convert_addr,convert_serial_num):
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     sql_cmd='update task set status=1 where old_sample_num=%d and new_sample_num=%d  and convert_address=%d and convert_serial_num=%d;' %(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
@@ -257,7 +257,7 @@ def main():
         second_success=bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr+base_addr,convert_serial_num)
         task_tuple=None
         if(second_success==1):
-            set_task_status(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
+            set_task_status_1(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
         else:
             # task fails
             set_task_status_2(old_sample_num,new_sample_num,convert_addr,convert_serial_num)

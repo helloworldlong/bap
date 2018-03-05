@@ -94,7 +94,7 @@ def get_sample_num():#return sample_num
     data = cursor.fetchone()
     db.close()
     return data
-def set_sample_status(sample_num):
+def set_sample_status_1(sample_num):
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     #update sample table
@@ -102,7 +102,7 @@ def set_sample_status(sample_num):
     cursor.execute(sql_cmd)
     db.commit()
     db.close()
-def set_sample_status_1(sample_num): #occupy
+def set_sample_status_3(sample_num): #occupy
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     #update sample table
@@ -225,10 +225,10 @@ def main():
                 print 'get sample_num %d' %sample_num_tuple[0]
                 break
         
-        set_sample_status_1(sample_num)
+        set_sample_status_3(sample_num)
         print sample_num
         bap_cmd_first(sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name)
-        set_sample_status(sample_num)
+        set_sample_status_1(sample_num)
         sample_num_tuple=None
         
         

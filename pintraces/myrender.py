@@ -38,7 +38,7 @@ def get_sample_num():#return sample_num
     data = cursor.fetchone()
     db.close()
     return data
-def set_sample_status(sample_num):
+def set_sample_status_2(sample_num):
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     #update sample table
@@ -86,7 +86,7 @@ def main():
                 print 'get trace %d'%sample_num_tuple[0]
                 break
         sample_num=sample_num_tuple[0]
-        set_sample_status(sample_num)
+        set_sample_status_2(sample_num)
         #print sample_num
         run_base_addr=color_trace(sample_num)
         if(run_base_addr==0):
