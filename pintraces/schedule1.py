@@ -83,6 +83,14 @@ def stp_solve(old_sample_num,convert_addr):
     stp_cmd='stp '+str(old_sample_num)+'-4'+hex(convert_addr)+'.f'+' > '+str(old_sample_num)+'-4'+hex(convert_addr)+'.s'
     print "[*] stp  cmd: ", stp_cmd
     os.system(stp_cmd)
+    my_s=str(old_sample_num)+'-4'+hex(convert_addr)+'.s'
+    my_s_file=open(my_s,'r')
+    first_line=my_s_file.readline()
+    my_s_file.close()
+    if(first_line=='Valid.\n'):
+        return 0
+    else:
+        return 1
 def make_sample(old_sample_num,new_sample_num,suffix_name,convert_addr): #int int string
     make_sample_cmd='makenewsample  '+str(old_sample_num)+'-4'+hex(convert_addr)+'.s '+str(old_sample_num)+'-assist.txt '+ str(old_sample_num)+suffix_name+' '+str(new_sample_num)+suffix_name
     print "[*] make_sample  cmd: ", make_sample_cmd
@@ -132,10 +140,20 @@ def set_task_status(old_sample_num,new_sample_num,convert_addr,convert_serial_nu
     cursor.execute(sql_cmd)
     db.commit()
     db.close()
-def set_task_status_1(old_sample_num,new_sample_num,convert_addr,convert_serial_num):
+#occupy status
+def set_task_status_3(old_sample_num,new_sample_num,convert_addr,convert_serial_num):
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     sql_cmd='update task set status=3 where old_sample_num=%d and new_sample_num=%d and convert_address=%d and convert_serial_num=%d;' %(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
+    #print sql_cmd
+    cursor.execute(sql_cmd)
+    db.commit()
+    db.close()
+#failure status
+def set_task_status_2(old_sample_num,new_sample_num,convert_addr,convert_serial_num):
+    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
+    cursor = db.cursor()
+    sql_cmd='update task set status=2 where old_sample_num=%d and new_sample_num=%d and convert_address=%d and convert_serial_num=%d;' %(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
     #print sql_cmd
     cursor.execute(sql_cmd)
     db.commit()
@@ -190,9 +208,14 @@ def bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,el
     global base_addr,high_addr
     convert_path(old_sample_num,convert_addr,convert_serial_num)  #0804862C          
     il_f(old_sample_num,convert_addr)
-    stp_solve(old_sample_num,convert_addr)
-    make_sample(old_sample_num,new_sample_num,suffix_name,convert_addr)
-    insert_sample(new_sample_num)
+    stp_success=stp_solve(old_sample_num,convert_addr)
+    if(stp_success==1):
+        make_sample(old_sample_num,new_sample_num,suffix_name,convert_addr)
+        insert_sample(new_sample_num)
+        return 1
+    else:
+        print "stp does not solve it."
+        return 0
     
 def bap_cmd_first(old_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name):
     global base_addr,high_addr
@@ -229,17 +252,22 @@ def main():
         new_sample_num=task_tuple[1]
         convert_addr=task_tuple[2]
         convert_serial_num=task_tuple[3]
-        set_task_status_1(old_sample_num,new_sample_num,convert_addr,convert_serial_num) #occupy
+        set_task_status_3(old_sample_num,new_sample_num,convert_addr,convert_serial_num) #occupy
         base_addr,high_addr=get_base_addr(old_sample_num)
-        bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr+base_addr,convert_serial_num)
+        second_success=bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr+base_addr,convert_serial_num)
         task_tuple=None
-        set_task_status(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
+        if(second_success==1):
+            set_task_status(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
+        else:
+            # task fails
+            set_task_status_2(old_sample_num,new_sample_num,convert_addr,convert_serial_num)
 
             
 
     
 main()
 #convert_path(1,0x804854f,1)
+#print str(stp_solve(1,134514254))
 
             
 
