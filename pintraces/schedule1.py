@@ -165,7 +165,7 @@ def main():
         line_num=task_tuple[4]
         set_task_status_3(old_sample_num,new_sample_num,convert_addr,convert_serial_num,line_num) #occupy
         base_addr,high_addr=get_base_addr(old_sample_num)
-        second_success=bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr+base_addr,convert_serial_num,line_num)
+        second_success=bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr,convert_serial_num,line_num)
         task_tuple=None
         if(second_success==1):
             set_task_status_1(old_sample_num,new_sample_num,convert_addr,convert_serial_num,line_num)

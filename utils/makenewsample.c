@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 			}
 			else
 			{
-				printf("The %dth taint variable (start from 1),the offset in the file is %d (start from 0)\n",n,t_offsets[n-1]);
+				printf("The %dth taint variable (start from 1),the offset in the file is %d (start from 0),value=%d\n",n,t_offsets[n-1],value);
 				fseek(fpn,t_offsets[n-1],SEEK_SET);
 				
 				fwrite(&value,1,1,fpn);

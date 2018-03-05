@@ -57,10 +57,10 @@ def insert_task(run_base_addr,old_sample_num):
     #while(os.path.exists(trace_file_name)==False):
     #    time.sleep(2)
     f_taint = open(trace_file_name,'r')
-    print str(old_sample_num)+' run_base_addr: '+hex(run_base_addr)
+    #print str(old_sample_num)+' run_base_addr: '+hex(run_base_addr)
     for line in f_taint.readlines():
         line_num=int(line.split()[0],10) #can not overflow!!!
-        convert_addr=int(line.split()[1],10)-run_base_addr
+        convert_addr=int(line.split()[1],10)
         convert_serial_num=int(line.split()[2],10) 
         print hex(convert_addr),str(line_num),str(convert_serial_num)
         

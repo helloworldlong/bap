@@ -85,10 +85,9 @@ def get_taint_branch(old_sample_num,base_addr,high_addr):
                 else:
                     myaddr=int(taint_addr_str[taint_addr_str.find('_',0)+1:taint_addr_str.find('_',18)],16)
                 #myaddr=int(taint_addr_str[line_pos:],16) # absolute address
-                if(myaddr>base_addr and myaddr<high_addr):
-                    #print hex(myaddr)
-                    taint_branch[file_line_num]=(myaddr,serial_num)
-                    serial_num=serial_num+1
+                #if(myaddr>base_addr and myaddr<high_addr):
+                taint_branch[file_line_num]=(myaddr,serial_num)
+                serial_num=serial_num+1
 
             else:
                 print 'taint_addr_str '+taint_addr_str 

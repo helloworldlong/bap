@@ -54,7 +54,7 @@ int main(int argc, char **argv)
   */
   //mystrcmp while condition
   
-  if(mystrcmp(buff,"bbc\n")==0)
+  if(strcmp(buff,"bbc\n")==0)
   {
     printf("ok\n");
   }
