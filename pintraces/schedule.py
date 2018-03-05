@@ -30,62 +30,6 @@ def lift_il(old_sample_num):#int
     print "[*] iltrans il cmd: ", iltrans_cmd
     os.system(iltrans_cmd)
 
-def convert_path(old_sample_num,convert_addr):#int
-    #give the convert address(int)
-    print "[*] convert_path addr: ", hex(convert_addr)
-    #convert_addr=base_addr+convert_addr
-    f_il=open(str(old_sample_num)+'-3.il','r')
-    file_lines=f_il.readlines()
-    f_il.close()
-    file_line_num=0
-    find_convert_line=0
-    for line in file_lines:
-        if (line.find("label pc_0x")!=-1 ):
-            line_pos=line.find("label pc_0x")+len("label pc_0x")
-            myaddr=int(line[line_pos:],16) # absolute address
-            #print 'myaddr %x'%myaddr
-            #print 'convert_addr %x'%convert_addr
-            if(myaddr==convert_addr):
-                convert_line=file_lines[file_line_num+1]
-                if(convert_line.find('assert')!=-1):
-                    file_lines[file_line_num+1]='assert ~('+convert_line[7:-1]+')'+'\n'
-                    find_convert_line=1
-                    print 'find convert line',str(file_line_num)
-                    break # now only the first
-                else:
-                    print 'error assert'
-                    exit()   
-        file_line_num=file_line_num+1
-    if(find_convert_line==1):
-        f_il_c=open(str(old_sample_num)+'-4'+hex(convert_addr)+'.il','w')
-        for line in file_lines:
-            f_il_c.write(line)
-        f_il_c.close()
-    else:
-        print 'convert fail'
-        exit()
-def il_f(old_sample_num,convert_addr):
-    il_f_cmd='topredicate -il '+str(old_sample_num)+'-4'+hex(convert_addr)+'.il'+' -q -noopt -stp-out '+str(old_sample_num)+'-4'+hex(convert_addr)+'.f' 
-    print "[*] il_f  cmd: ", il_f_cmd   
-    os.system(il_f_cmd)
-def stp_solve(old_sample_num,convert_addr):
-    stp_cmd='stp '+str(old_sample_num)+'-4'+hex(convert_addr)+'.f'+' > '+str(old_sample_num)+'-4'+hex(convert_addr)+'.s'
-    print "[*] stp  cmd: ", stp_cmd
-    os.system(stp_cmd)
-def make_sample(old_sample_num,new_sample_num,suffix_name): #int int string
-    make_sample_cmd='makenewsample  '+str(old_sample_num)+'-4'+hex(convert_addr)+'.s '+str(old_sample_num)+'-assist.txt '+ str(old_sample_num)+suffix_name+' '+str(new_sample_num)+suffix_name
-    print "[*] make_sample  cmd: ", make_sample_cmd
-    os.system(make_sample_cmd)
-def get_task():
-    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
-    cursor = db.cursor()
-    sql_cmd='select * from task where done=0;'
-    cursor.execute(sql_cmd)
-    data = cursor.fetchone()
-    print data
-    #print type(data)
-    db.close()
-    return data
 def get_sample_num():#return sample_num
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
@@ -110,29 +54,10 @@ def set_sample_status_3(sample_num): #occupy
     cursor.execute(sql_cmd)
     db.commit()
     db.close()
-def get_task_data():#return sample_num
-    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
-    cursor = db.cursor()
-    sql_cmd='select old_sample_num,new_sample_num,convert_address from task where status=0 order by convert_address;'
-    cursor.execute(sql_cmd)
-    data = cursor.fetchone()
-    db.close()
-    print data
-    print type(data)
-    return data
-   
-def set_task_status(old_sample_num,new_sample_num,convert_addr):
-    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
-    cursor = db.cursor()
-    sql_cmd='update task set status=1 where (old_sample_num=%d and new_sample_num=%d) and convert_address=%d;' %(old_sample_num,new_sample_num,convert_addr)
-    #print sql_cmd
-    cursor.execute(sql_cmd)
-    db.commit()
-    db.close()
-    
+      
 def cp_share_folder(old_sample_num):
     os.system('cp %d-addrs.txt /mnt/hgfs/ubuntu14-disk/share/'%old_sample_num)
-    #os.system('cp %d-addrs1.txt /mnt/hgfs/ubuntu14-disk/share/'%old_sample_num)
+    os.system('cp %d-addrs1.txt /mnt/hgfs/ubuntu14-disk/share/'%old_sample_num)
 
 def get_base_addr(old_sample_num):
     filename1='%d-addrs.txt'%old_sample_num
@@ -176,21 +101,7 @@ def get_taint_branch(old_sample_num,base_addr,high_addr):
     for line_num_1,(convert_addr_1,serial_num_1) in taint_branch.items():
         f_o.write(str(line_num_1)+' '+str(convert_addr_1)+' '+str(serial_num_1)+'\n')
     f_o.close()
-def insert_sample(sample_num):
-    db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
-    cursor = db.cursor()
-    sql_cmd='insert ignore into sample(sample_num,status) values('+str(sample_num)+','+str(0)+');'
-    cursor.execute(sql_cmd)
-    db.commit()
-    db.close()
-def bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name,convert_addr):
-    global base_addr,high_addr
-    convert_path(old_sample_num,convert_addr)  #0804862C          
-    il_f(old_sample_num,convert_addr)
-    stp_solve(old_sample_num,convert_addr)
-    make_sample(old_sample_num,new_sample_num,suffix_name)
-    insert_sample(new_sample_num)
-    
+   
 def bap_cmd_first(old_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name):
     global base_addr,high_addr
     run_pin_cmd(old_sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name)
@@ -237,7 +148,7 @@ def main():
 
     
 main()
-#lift_il(1)
+
 
             
 
