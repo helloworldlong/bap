@@ -2025,8 +2025,8 @@ VOID ModLoad(IMG img, VOID *v)
     //cerr << "This is modload()" << endl;
 
     const string &name = IMG_Name(img);
-    DllbaseAddress = IMG_LowAddress(img);       
-    DllhighAddress = IMG_HighAddress(img);
+    ADDRINT DllbaseAddress1 = IMG_LowAddress(img);       
+    //ADDRINT DllhighAddress1 = IMG_HighAddress(img);
 
     frame f;
     f.mutable_modload_frame()->set_module_name(name);
@@ -2040,14 +2040,15 @@ VOID ModLoad(IMG img, VOID *v)
     if(l_it==module_map.end())
     {
         //cout<<"we do not find 112"<<endl;
-        module_map.insert(pair<string,int>(name,DllbaseAddress));
+        module_map.insert(pair<string,int>(name,DllbaseAddress1));
     }
 
     PIN_ReleaseLock(&lock);
     //2018
 	if(strstr(name.c_str(),CoverageModule) != NULL)
 	{
-		 
+		DllbaseAddress = IMG_LowAddress(img);       
+        DllhighAddress = IMG_HighAddress(img);
         fpaddrs<<hex<<DllbaseAddress<<" "<<DllhighAddress<<endl;       
 	}
 	///////////////////

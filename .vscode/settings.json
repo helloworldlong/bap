@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "*.ph": "cpp",
-        "iosfwd": "cpp",
-        "array": "cpp",
-        "slist": "cpp",
-        "initializer_list": "cpp"
-    }
-}
