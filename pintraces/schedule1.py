@@ -71,7 +71,7 @@ def make_sample(old_sample_num,new_sample_num,suffix_name,convert_addr,line_num)
 def get_task_data():#return sample_num
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
-    sql_cmd='select old_sample_num,new_sample_num,convert_address,convert_serial_num,line_num from task where status=0 order by convert_address;'
+    sql_cmd='select old_sample_num,new_sample_num,convert_address,convert_serial_num,line_num from task where status=0 order by line_num;'
     cursor.execute(sql_cmd)
     data = cursor.fetchone()
     db.close()

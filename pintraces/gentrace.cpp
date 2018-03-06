@@ -11,7 +11,8 @@
 #include <stdint.h>
 #include <cstdlib>
 #include <time.h>
-
+#include <map>
+#include <string> 
 //#include "pin_frame.h"
 //#include "pin_trace.h"
 #include "reg_mapping_pin.h"
@@ -148,6 +149,7 @@ list <branch_st> g_bbls;
 int count_bbls = 0;
 char CoverageModule[0x20];  //coverage module name
 ofstream fpaddrs;  //bbl address file
+ofstream fmodule_addr;//module load address
 ADDRINT  DllbaseAddress=0; //module base address
 ADDRINT  DllhighAddress=0; //module high address
 uint32_t  g_TaintAsistBuff[4096]; //assist buffer -> taint bytes range 
@@ -2015,13 +2017,16 @@ VOID ThreadStart(THREADID threadid, CONTEXT *ctx, INT32 flags, VOID *v)
     PIN_ReleaseLock(&lock);
 
 }
-
+//unsigned int moudle_index=1;
+map<string, unsigned int> module_map; 
 VOID ModLoad(IMG img, VOID *v)
 {
 
     cerr << "This is modload()" << endl;
 
     const string &name = IMG_Name(img);
+    DllbaseAddress = IMG_LowAddress(img);       
+    DllhighAddress = IMG_HighAddress(img);
 
     frame f;
     f.mutable_modload_frame()->set_module_name(name);
@@ -2030,13 +2035,19 @@ VOID ModLoad(IMG img, VOID *v)
 
     PIN_GetLock(&lock, 0);
     g_twnew->add(f);
+    map<string ,unsigned int >::iterator l_it;; 
+    l_it=module_map.find(name);
+    if(l_it==module_map.end())
+    {
+        //cout<<"we do not find 112"<<endl;
+        module_map.insert(pair<string,int>(name,DllbaseAddress));
+    }
+
     PIN_ReleaseLock(&lock);
     //2018
 	if(strstr(name.c_str(),CoverageModule) != NULL)
 	{
-		DllbaseAddress = IMG_LowAddress(img);
-        
-        DllhighAddress = IMG_HighAddress(img); 
+		 
         fpaddrs<<hex<<DllbaseAddress<<" "<<DllhighAddress<<endl;       
 	}
 	///////////////////
@@ -2713,7 +2724,19 @@ VOID Fini(INT32 code, VOID *v)
     LOG("In Fini");
     Cleanup();
 }
+// BKDR Hash Function
+unsigned int myBKDRHash( char *str)
+{
+    unsigned int seed = 131; // 31 131 1313 13131 131313 etc..
+    unsigned int hash = 0;
 
+    while (*str)
+    {
+        hash = hash * seed + (*str++);
+    }
+
+    return (hash & 0x7FFFFFFF);
+}
 // Caller responsible for mutual exclusion
 VOID Cleanup()
 {
@@ -2735,6 +2758,18 @@ VOID Cleanup()
 	FILE *fp = fopen(ss.str().c_str(), "wb");
 	fwrite(g_TaintAsistBuff, 4, g_tsbufidx + 1, fp);
 	fclose(fp);
+    map <string, unsigned int>::iterator m1_Iter;
+    char module_name[100];
+    //strncpy(module_name,(m1_Iter->first).c_str(),100);
+    unsigned int myhash_value=0;//=myBKDRHash(module_name);
+    for ( m1_Iter = module_map.begin(); m1_Iter!= module_map.end(); m1_Iter++ )
+    {
+
+        strncpy(module_name,(m1_Iter->first).c_str(),100);
+        myhash_value=myBKDRHash(module_name);
+        fmodule_addr <<hex<<myhash_value <<" "<<m1_Iter->second<<endl;
+    }
+    fmodule_addr.close();
     //////////////////////////
     LOG("done.\n");
 
@@ -2813,6 +2848,9 @@ int main(int argc, char *argv[])
 	stringstream ss2;
     ss2 <<KnobOut.Value()<<"-"<<"addrs.txt";
 	fpaddrs.open(ss2.str().c_str());
+    stringstream ss3;
+    ss3 <<KnobOut.Value()<<"-"<<"module.txt";
+	fmodule_addr.open(ss3.str().c_str());
 	///////////////////////
     /* Get a key for thread info */
     tl_key = PIN_CreateThreadDataKey(NULL);

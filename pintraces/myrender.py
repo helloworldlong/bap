@@ -47,6 +47,18 @@ def set_sample_status_2(sample_num):
     db.commit()
     db.close()
 
+def quicksort(nums):
+    if len(nums) <= 1:
+        return nums
+    less = []
+    greater = []
+    base = nums.pop()
+    for base1 in nums:
+        if base1[1] < base[1]:
+            less.append(base1)
+        else:
+            greater.append(base1)
+    return quicksort(less) + [base] + quicksort(greater)
 
 def insert_task(run_base_addr,old_sample_num):
     global g_new_num
@@ -54,13 +66,30 @@ def insert_task(run_base_addr,old_sample_num):
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
     trace_file_name='%d-addrs1.txt'%old_sample_num
-    #while(os.path.exists(trace_file_name)==False):
-    #    time.sleep(2)
+    module_file_name='%d-module.txt'%old_sample_num
+    f_module=open(module_file_name,'r')
+    module_list=[]
+    for line in f_module.readlines():
+        hash_val=int(line.split()[0],16) #can not overflow!!!
+        base_addr=int(line.split()[1],16)
+        module_list.append((hash_val,base_addr))
+    print module_list
+    f_module.close()
+    #sort
+    sort_module_list=quicksort(module_list)
+
     f_taint = open(trace_file_name,'r')
     #print str(old_sample_num)+' run_base_addr: '+hex(run_base_addr)
     for line in f_taint.readlines():
         line_num=int(line.split()[0],10) #can not overflow!!!
         convert_addr=int(line.split()[1],10)
+        for base1 in sort_module_list:
+            if(convert_addr>base1[1]):
+                print 'before hash '+hex(convert_addr)
+                convert_addr=convert_addr-base1[1]
+                convert_addr=convert_addr^base1[0]
+                print 'after hash '+hex(convert_addr)
+                break
         convert_serial_num=int(line.split()[2],10) 
         print hex(convert_addr),str(line_num),str(convert_serial_num)
         
