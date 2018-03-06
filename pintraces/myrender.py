@@ -54,7 +54,7 @@ def quicksort(nums):
     greater = []
     base = nums.pop()
     for base1 in nums:
-        if base1[1] < base[1]:
+        if base1[1] > base[1]:
             less.append(base1)
         else:
             greater.append(base1)
