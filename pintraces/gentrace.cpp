@@ -2022,7 +2022,7 @@ map<string, unsigned int> module_map;
 VOID ModLoad(IMG img, VOID *v)
 {
 
-    cerr << "This is modload()" << endl;
+    //cerr << "This is modload()" << endl;
 
     const string &name = IMG_Name(img);
     DllbaseAddress = IMG_LowAddress(img);       
