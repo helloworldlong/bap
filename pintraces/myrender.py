@@ -25,7 +25,7 @@ def color_trace(old_sample_num):
             continue
         tmp_addr=int(line,16)+mybase_addr
         mycolor=old_sample_num   
-        print hex(tmp_addr)+' '+hex(mycolor)  
+        #print hex(tmp_addr)+' '+hex(mycolor)  
         set_color(tmp_addr,CIC_ITEM,mycolor)
     f_trace.close()
     return run_base_addr
@@ -46,7 +46,7 @@ def set_sample_status_2(sample_num):
     cursor.execute(sql_cmd)
     db.commit()
     db.close()
-
+#from big to small
 def quicksort(nums):
     if len(nums) <= 1:
         return nums
@@ -54,7 +54,7 @@ def quicksort(nums):
     greater = []
     base = nums.pop()
     for base1 in nums:
-        if base1[1] < base[1]:
+        if base1[1] > base[1]:
             less.append(base1)
         else:
             greater.append(base1)
