@@ -14,21 +14,24 @@ cursor.execute("DROP TABLE IF EXISTS task")
 cursor.execute("DROP TABLE IF EXISTS sample")
 # create table BAP
 sql = """CREATE TABLE task (
-         old_sample_num  INT,
-         new_sample_num  INT,
-         convert_address INT,
-         convert_serial_num INT,
-         line_num INT,
-         status INT,
-         PRIMARY KEY (convert_address,convert_serial_num)
+         old_sample_num  INT(32) UNSIGNED,
+         new_sample_num  INT(32) UNSIGNED,
+         convert_address INT(32) UNSIGNED,
+         convert_serial_num INT(32) UNSIGNED,
+         line_num INT(32) UNSIGNED,
+         status INT(32) UNSIGNED
           )"""
 
 cursor.execute(sql)
-
+sql='''
+ALTER TABLE task
+ADD UNIQUE KEY(convert_address,convert_serial_num);
+'''
+cursor.execute(sql)
 sql = """CREATE TABLE sample (
-         sample_num  INT,
-         status INT,
-         PRIMARY KEY (sample_num)
+         sample_num  INT(32) UNSIGNED,
+         status INT(32) UNSIGNED,
+         UNIQUE KEY (sample_num)
           )"""
 cursor.execute(sql)
 

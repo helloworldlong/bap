@@ -67,7 +67,10 @@ def insert_task(run_base_addr,old_sample_num):
         sql_cmd='insert ignore into task(old_sample_num,new_sample_num,convert_address,convert_serial_num,line_num,status) values('+str(old_sample_num)+','+str(g_new_num)+','+str(convert_addr)+','+str(convert_serial_num)+','+str(line_num)+','+str(0)+');'
         mm=cursor.execute(sql_cmd)
         if(mm):
+            print sql_cmd
             g_new_num=g_new_num+1
+        else:
+            print 'not insert '+sql_cmd
         db.commit()
     f_taint.close()
     db.close()
