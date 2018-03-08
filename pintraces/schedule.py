@@ -94,9 +94,10 @@ def get_taint_branch(old_sample_num,base_addr,high_addr):
                 
                 else:
                     find_pc_num=find_pc_num+1
-                    if(file_line_num>100):
+                    if(find_pc_num>100):
                         print 'taint_addr_str '+taint_addr_str 
                         print file_line_num
+                        print find_pc_num
                         print 'label error'
                         exit()
         file_line_num=file_line_num+1
