@@ -80,6 +80,7 @@ int main(int argc, char **argv)
   }
   */
   //mystrcmp while condition
+  //str_split strcmp two cmd 90 smaples
   mycmd_t mycmd_t_d;
   str_split(buff,mycmd_t_d.cmd,mycmd_t_d.data,' ');
   if(strcmp(mycmd_t_d.cmd,"pwd")==0)
