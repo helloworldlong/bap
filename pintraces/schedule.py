@@ -77,23 +77,28 @@ def get_taint_branch(old_sample_num,base_addr,high_addr):
     for line in file_lines:
         if (line.find("assert ")!=-1 ) and (line.find("assert true")==-1):
             #print hex(base_addr),hex(high_addr)
-            taint_addr_str=file_lines[file_line_num-2]          
-            if(taint_addr_str.find('label pc_')!=-1):
-                line_pos=taint_addr_str.find("label pc_0x")+len("label pc_0x")
-                if(len(taint_addr_str)<=19):
-                    myaddr=int(taint_addr_str[line_pos:],16) # absolute address
+            find_pc_num=2
+            while(1):  
+                taint_addr_str=file_lines[file_line_num-find_pc_num] 
+                if(taint_addr_str.find('label pc_0x')!=-1):
+                    line_pos=taint_addr_str.find("label pc_0x")+len("label pc_0x")
+                    if(len(taint_addr_str)<=19):
+                        myaddr=int(taint_addr_str[line_pos:],16) # absolute address
+                    else:
+                        myaddr=int(taint_addr_str[taint_addr_str.find('_',0)+1:taint_addr_str.find('_',18)],16)
+                    #myaddr=int(taint_addr_str[line_pos:],16) # absolute address
+                    #if(myaddr>base_addr and myaddr<high_addr):
+                    taint_branch[file_line_num]=(myaddr,serial_num)
+                    serial_num=serial_num+1
+                    break
+                
                 else:
-                    myaddr=int(taint_addr_str[taint_addr_str.find('_',0)+1:taint_addr_str.find('_',18)],16)
-                #myaddr=int(taint_addr_str[line_pos:],16) # absolute address
-                #if(myaddr>base_addr and myaddr<high_addr):
-                taint_branch[file_line_num]=(myaddr,serial_num)
-                serial_num=serial_num+1
-
-            else:
-                print 'taint_addr_str '+taint_addr_str 
-                print file_line_num
-                print 'label error'
-                exit()
+                    find_pc_num=find_pc_num+1
+                    if(file_line_num>100):
+                        print 'taint_addr_str '+taint_addr_str 
+                        print file_line_num
+                        print 'label error'
+                        exit()
         file_line_num=file_line_num+1
     
     f_o=open('%d-addrs1.txt'%old_sample_num,'w')

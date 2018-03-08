@@ -26,6 +26,33 @@ int cmpint(int a, int b)
     return 0;
   }
 }
+typedef struct mycmd
+{
+  char cmd[16];
+  char data[32];
+}mycmd_t;
+void str_split( char *str, char *left, char *right, char limit)
+{	
+    //if(strlen())
+    memset(left,0,16);
+    memset(right,0,32);
+    if(strlen(str)>16)
+    {
+      printf("long string\n");
+      exit(0);
+    }
+    char *p = strrchr(str, limit);
+	
+	if (p == NULL)
+	{
+		strcpy(left, str);
+	}
+	else
+	{
+		strncpy(left, str, p-str);
+		strcpy(right, p+1);
+	}
+}
 int main(int argc, char **argv)
 {
   int  fd;
@@ -53,13 +80,19 @@ int main(int argc, char **argv)
   }
   */
   //mystrcmp while condition
-  
-  if(strcmp(buff,"bbc\n")==0)
+  mycmd_t mycmd_t_d;
+  str_split(buff,mycmd_t_d.cmd,mycmd_t_d.data,' ');
+  if(strcmp(mycmd_t_d.cmd,"pwd")==0)
   {
-    printf("ok\n");
+    printf("pwd\n");
   }
-  else{
-    printf("nook\n");
+  else if(strcmp(mycmd_t_d.cmd,"cwd")==0)
+  {
+    printf("cwd\n");
+  }
+  else
+  {
+    printf("no cmd\n");
   }
   //simplest condition
 /*
