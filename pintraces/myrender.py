@@ -110,36 +110,43 @@ def clear_file(old_sample_num):
     os.system('rm '+trace_file_name)
     os.system('rm '+trace_file_name1)
     os.system('rm '+module_file_name)
-def get_jnz_ratio():
+jnz_addr=[]
+def get_all_jnz():
+    global jnz_addr
     fsegmy=FirstSeg()
     segci=0
     jnz_count=0
-    jnz_color_count=0
     while(fsegmy!=BADADDR ):
         segci+=1
         mysegattr=GetSegmentAttr(fsegmy,SEGATTR_TYPE)
         if(mysegattr==2):
             segnamemy=SegName(fsegmy)
             segendmy=SegEnd(fsegmy)
-            print " (%s) is %d,segstart = %x,segend = %x" %(segnamemy,mysegattr,fsegmy,segendmy)
+            #print " (%s) is %d,segstart = %x,segend = %x" %(segnamemy,mysegattr,fsegmy,segendmy)
             addr0=fsegmy
             addr4=FindCode(addr0,SEARCH_DOWN)
             while(addr4<segendmy):
                 Instruction = GetMnem(addr4)
                 #str_f=GetDisasm(addr4)
                 if (Instruction.find("j")!=-1 and Instruction!='jmp'):
-                    print Instruction
-                    if(get_color(addr4,CIC_ITEM)!=0xffffffff):  #str(get_color(here(),CIC_ITEM))
-                        jnz_color_count=jnz_color_count+1
+                    jnz_addr.append(addr4)
                     jnz_count=jnz_count+1
                 addr4=FindCode(addr4,SEARCH_DOWN)
         fsegmy=NextSeg(fsegmy)
-    print str(jnz_count),str(jnz_color_count),str(jnz_color_count/(jnz_count*1.0))
-    return (jnz_count,jnz_color_count)
+    print 'jnz_count '+str(jnz_count) 
+    return jnz_count
+def get_jnz_ratio(jnz_count):
+    global jnz_addr
+    jnz_color_count=0
+    for tmp in jnz_addr:
+        if(get_color(tmp,CIC_ITEM)!=0xffffffff):
+            jnz_color_count=jnz_color_count+1
+    print 'jnz_color_count '+str(jnz_color_count)+' '+str(jnz_count)+" ratio: "+str(jnz_color_count*1.0/jnz_count)
 def main():
     os.chdir('/Users/longlong/VirtualBox VMs/ubuntu14-disk/share')
     sample_num=1
     sample_num_tuple=None
+    jnz_count=get_all_jnz()
     while(1):
         while(sample_num_tuple==None):
             sample_num_tuple=get_sample_num()
@@ -158,14 +165,15 @@ def main():
             exit()
         insert_task(run_base_addr,sample_num)
         sample_num_tuple=None
-        get_jnz_ratio()
+        get_jnz_ratio(jnz_count)
         clear_file(sample_num)
     
 
     
 #main()
 #color_trace(1)
-get_all_jnz()
+jnz_count=get_all_jnz()
+get_jnz_ratio(jnz_count)
 print 'ok'
 
 
