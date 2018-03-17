@@ -5,12 +5,7 @@ This is a fork of the BAP version 0.8 release that appeared at:
 
 https://github.com/0day1day/bap/
 
-I am trying to keep this fork updated with patches, fixes, etc.
-Feel free to fork and submit pull requests.
 
-For more information see the official project webpage at:
-
-http://bap.ece.cmu.edu/
 
 For the original README of BAP see the README.orig file.
 
@@ -29,13 +24,7 @@ I have tested this fork only with the following configurations:
     * idapro
   
 
-* OS X 10.9.4 (no Pintool yet)
-    * Apple LLVM version 5.1 (clang-503.0.40) (based on LLVM 3.4svn)
-    * OPAM 1.1.1
-    * OCaml 4.01.0
-    * All BAP's OCaml package dependencies from OPAM
-    * MacPorts 2.3.1 (see the INSTALL file)
-    * libiberty from binutils 2.24 needs to be manually installed
+
 
 Building on Linux
 -----------------
@@ -51,27 +40,14 @@ Then download Pin version 2.14-67254-gcc.4.4.7-linux and place it at
 Add the ./bap/utils directory to your path. The Pintool is at
 ./bap/pintraces/obj-ia32/gentrace.so.
 
-Building on OS X
-----------------
-
-Follow the instructions from the INSTALL file. Before the "./autogen.sh"
-step you need to manually install libiberty from binutils, with something
-like:
-
-    wget http://ftp.gnu.org/gnu/binutils/binutils-2.24.tar.bz2
-    tar jxvf binutils-2.24.tar.bz2
-    cd binutils-2.24/libiberty
-    ./configure --prefix=/opt/local --enable-install-libiberty
-    make
-    sudo make install
-
-The Pintool needs to be ported to OS X.
-
-Developing with BAP
+Running command  
 -------------------
 
-For an example standalone utility that uses BAP see the example-util
-directory. The example-util directory doesn't need to be in the bap
-directory; place it wherever and edit example-util/Makefile to specify
-the location of where you compiled BAP.
+1. mywps  
+python schedule.py 0 10 mywps /home/l/bap/mywps/mywps " " .txt  
+python schedule1.py 0 10 mywps /home/l/bap/mywps/mywps " " .txt  
 
+2. file  
+cp mywps 1.elf
+python schedule.py 0 100 file /usr/local/bin/file " " .elf 
+python schedule1.py 0 100 file /usr/local/bin/file " " .elf
