@@ -20,6 +20,7 @@
 
 /* The new trace container format */
 #include "trace.container.hpp"
+#include <capstone/capstone.h>
 
 #include "pivot.h"
 
@@ -2517,144 +2518,142 @@ VOID FollowParent(THREADID threadid, const CONTEXT* ctxt, VOID * arg)
     PIN_ReleaseLock(&lock);
 }
 
-VOID ExceptionHandler(THREADID threadid, CONTEXT_CHANGE_REASON reason, const CONTEXT *from, CONTEXT *to, INT32 info, VOID *v) {
 
-    dbg_printf("ExceptionHandler tid=%d info=0x%x v=%p\n", threadid, info, v);
-    /*
-      CONTEXT_CHANGE_REASON_FATALSIGNAL          Receipt of fatal Unix signal.
-      CONTEXT_CHANGE_REASON_SIGNAL       Receipt of handled Unix signal.
-      CONTEXT_CHANGE_REASON_SIGRETURN    Return from Unix signal handler.
-      CONTEXT_CHANGE_REASON_APC          Receipt of Windows APC.
-      CONTEXT_CHANGE_REASON_EXCEPTION    Receipt of Windows exception.
-      CONTEXT_CHANGE_REASON_CALLBACK     Receipt of Windows call-back.
-    */
+int mydisam(char*buf,uint32_t myaddress,FILE * fp)
 
-    /*
-      If there is a fatal exception, we should halt the trace as soon
-      as possible, so we can exit.
+{
+    csh handle;
+    cs_insn *insn;
+    size_t count;
+    char  buffer[2048];
 
-      Also, FlushInstructions() needs mutual exclusivity.
-    */
+    if (cs_open(CS_ARCH_X86, CS_MODE_32, &handle) != CS_ERR_OK)
+        return -1;
+    count = cs_disasm(handle, (const uint8_t*)buf, 30, myaddress, 0, &insn);
+    //cerr << "count = " << count <<endl;
+    if (count > 0) 
+    {
+        size_t j;
+        sprintf(buffer,"ASM code:\n");
+        fwrite(buffer,1,strlen(buffer),fp); 
+        for (j = 0; j < count; j++) {
+        //cerr << "j = " << j <<endl;
 
-    // SWHITMANXXX Get information and put it into exception frame here
-    // XXX Put this into frame buffer
+        sprintf(buffer,"0x%x\t%s\t\t%s\n", (uint32_t)insn[j].address,insn[j].mnemonic, insn[j].op_str);
+        fwrite(buffer,1,strlen(buffer),fp); 
+        }
+        cs_free(insn, count);
+    } else
+    {
+        sprintf(buffer,"ERROR: Failed to disassemble given code!\n");
+        fwrite(buffer,1,strlen(buffer),fp); 
+        //printf("ERROR: Failed to disassemble given code!\n");
+    }
+      
+ 
+    cs_close(&handle);
+
+    return 0;
+ }
+ int LogExcepAsmCode(UINT  dwExceptionAddress,FILE * fp)
+{
+
+  char   szBuffer[100];
+  #define   CODE_LENGTH   30
+  #define   CODE_LENGTH2  60
+  if(fp==NULL)
+  {
+    return FALSE;
+  }
+  memset(szBuffer, 0, sizeof(szBuffer));
+  PIN_SafeCopy(szBuffer,(void *)(dwExceptionAddress), CODE_LENGTH);
+  
+  mydisam(szBuffer,dwExceptionAddress,fp);
+  
+  return TRUE;
+}
+VOID ExceptionHandler(THREADID threadid, CONTEXT_CHANGE_REASON reason, const CONTEXT *from, CONTEXT *to, INT32 info, VOID *v) 
+{
+    
 
     frame f;
+    int tmpflag=0;
+    char buffer[512];
     f.mutable_exception_frame()->set_exception_number(info);
     f.mutable_exception_frame()->set_thread_id(threadid);
     if (from) {
-        f.mutable_exception_frame()->set_from_addr(PIN_GetContextReg(from, REG_INST_PTR));
+        f.mutable_exception_frame()->set_from_addr(PIN_GetContextReg(from, LEVEL_BASE::REG_INST_PTR));
     }
     if (to) {
-        f.mutable_exception_frame()->set_to_addr(PIN_GetContextReg(to, REG_INST_PTR));
+        f.mutable_exception_frame()->set_to_addr(PIN_GetContextReg(to, LEVEL_BASE::REG_INST_PTR));
     }
-
-    PIN_GetLock(&lock, threadid+1);
+    cout<<"exception!!!!!!!!!!!!!!!!"<<endl;
+    PIN_GetLock(&lock, threadid+1);  
     LLOG("got except lock!\n");
 
     // If we want the exception to be the last thing in the trace when
     // we crash, then we need to flush.
     FlushBuffer(false, from, threadid, false);
     g_twnew->add(f);
-
-    if (reason == CONTEXT_CHANGE_REASON_FATALSIGNAL) {
+    cout<<"reason 2= "<<reason<<endl;
+    if (reason == CONTEXT_CHANGE_REASON_FATALSIGNAL||CONTEXT_CHANGE_REASON_SIGNAL==reason) 
+    {
+        cout<<"reason 1= "<<reason<<endl;
         std::cerr << "Received fatal signal " << info << endl;
-        FlushBuffer(false, from, threadid, false);
-        Cleanup();
-        exit(1);
-    } else if (reason == CONTEXT_CHANGE_REASON_EXCEPTION) {
-
-#ifdef _WIN32
-        ADDRINT pc = PIN_GetContextReg(from, REG_INST_PTR);
-        cerr << "Received windows exception @" << pc << " " << info << " in thread " << threadid << endl;
-
-        if (info == accessViolation && SEHMode.Value() && g_taint_introduced) {
-            cerr << "SEH mode activated!" << endl;
-            ADDRINT old_esp = PIN_GetContextReg(from, REG_STACK_PTR);
-            ADDRINT new_esp = PIN_GetContextReg(to, REG_STACK_PTR);
-
-            cerr << "old esp: " << old_esp << " new esp: " << new_esp
-                 << " old eip: " << PIN_GetContextReg(from, REG_INST_PTR) << " new eip: " << PIN_GetContextReg(to, REG_INST_PTR) << endl;
-
-            /* The windows exception handler just pushed a bunch of crap
-               onto the stack.  Although some of this is user controllable,
-               we can untaint it for now, since we are mainly concerned with
-               accessing our buffer. */
-            assert (new_esp < old_esp);
-            for (ADDRINT ptr = new_esp; ptr < old_esp; ptr++) {
-                tracker->untaintMem(ptr);
-            }
-
-            /* Try to find a tainted exception handler. */
-            ADDRINT eptr = PIN_GetContextReg(to, REG_SEG_FS_BASE)
-                + ehandler_fs_offset;
-
-            /* eptr points to the &(head of SEH). */
-            assert(PIN_SafeCopy(&eptr, (void*)eptr, sizeof(ADDRINT)) == sizeof(ADDRINT));
-
-            /* eptr points to head of SEH. */
-
-            for (int i = 0; i < maxSehLength; i++) {
-                // while (true) {
-                struct {
-                    ADDRINT nptr;
-                    ADDRINT handler;
-                } buf;
-                /* We supposedly have a pointer to an exception handler
-                   structure.  Let's make sure it's mapped. */
-                size_t b = PIN_SafeCopy((void*)&buf, (void*)eptr, ehandler_size);
-                if (b == ehandler_size) {
-
-                    /* Okay, we have an exception handler.  Let's see if the
-                       pointer handler is tainted.  So, check if M[eptr+4] is
-                       tainted. */
-                    ADDRINT hptr = eptr + ehandler_handler_offset;
-
-                    /* hptr holds the address of the handler. */
-                    cerr << "SEH handler M[" << hptr
-                         << "] = " << buf.handler
-                         << " (" << tracker->getMemTaint(hptr, pintrace::INVALIDREGMEM)
-                         << ")"
-                         << endl;
-
-                    eptr = buf.nptr;
-
-                } else {
-                    cerr << "Unable to read from " << eptr << endl;
-                    break;
-                }
-
-            }
-
-            ADDRINT esp = PIN_GetContextReg(to, REG_STACK_PTR);
-
-            /* The exception handling stuff will push a lot of data to the
-               stack, so take account for that here. */
-            PIN_SetContextReg(to, REG_STACK_PTR, esp-ehandler_esp_offset);
-
-            PIVOT_testpivot(ps, to, *tracker);
-
-            FlushBuffer(false, from, threadid, false);
-            Cleanup();
-            exit(1);
-
-        } else {
-            cerr << "Ignoring exception!" << endl;
+        ADDRINT pc = PIN_GetContextReg(from, LEVEL_BASE::REG_INST_PTR);
+        IMG i = IMG_FindByAddress(pc);
+        stringstream ss;
+        ss << KnobOut.Value()<< "-" <<"exception.txt";
+        FILE *fp = fopen(ss.str().c_str(), "wb");
+        if(IMG_Valid(i))
+          sprintf(buffer,"Exception signal=0x%x address=0x%x moudle=%s tid=%d\r\n",info,pc,IMG_Name(i).c_str(),threadid);
+        else
+          sprintf(buffer,"Exception signal=0x%x address=0x%x moudle=%s tid=%d\r\n",info,pc,"nomodule",threadid);
+        fwrite(buffer,1,strlen(buffer),fp);
+        sprintf(buffer,"Registers:  EAX=0x%x  EBX=0x%x  ECX=0x%x  EDX=0x%x; "
+                "ESI=0x%x  EDI=0x%x  EBP=0x%x  ESP=0x%x; EIP=0x%x  CS=0x%x  "
+                "DS=0x%x  FS=0x%x;\n",PIN_GetContextReg(from, LEVEL_BASE::REG_EAX),
+                PIN_GetContextReg(from, LEVEL_BASE::REG_EBX),PIN_GetContextReg(from, LEVEL_BASE::REG_ECX),
+                PIN_GetContextReg(from, LEVEL_BASE::REG_EDX),PIN_GetContextReg(from, LEVEL_BASE::REG_ESI),
+                PIN_GetContextReg(from, LEVEL_BASE::REG_EDI),PIN_GetContextReg(from, LEVEL_BASE::REG_EBP),
+                PIN_GetContextReg(from, LEVEL_BASE::REG_ESP),PIN_GetContextReg(from, LEVEL_BASE::REG_EIP),
+                PIN_GetContextReg(from, LEVEL_BASE::REG_SEG_CS),PIN_GetContextReg(from, LEVEL_BASE::REG_SEG_DS),
+                PIN_GetContextReg(from, LEVEL_BASE::REG_SEG_FS));
+        fwrite(buffer,1,strlen(buffer),fp);
+        LogExcepAsmCode(pc,fp);
+        // log callstack
+        uint32_t eip = PIN_GetContextReg(from, LEVEL_BASE::REG_EIP);
+        uint32_t ebp = PIN_GetContextReg(from, LEVEL_BASE::REG_EBP);
+        uint32_t childebp = 0;
+        memset(buffer, 0, sizeof(buffer));
+        sprintf(buffer,"Callstack:\nFramePtr ChildRBP RetAddr\n");
+        fwrite(buffer,1,strlen(buffer),fp);
+        int count = 0;
+        memset(buffer, 0, sizeof(buffer));
+        while(ebp != 0 && count < 20)
+        {
+            if(PIN_SafeCopy(&childebp, (uint32_t *)(ebp), 4) == 4) 
+            printf("childebp:%x,ebp:%x\n",childebp,ebp);
+            if(PIN_SafeCopy(&eip, (uint32_t *)(ebp + 4), 4) == 4) 
+                printf("eip:%x\n",eip);             
+            sprintf(buffer,  "0x%x 0x%x    0x%x\r\n", 
+                ebp, childebp, eip);
+            fwrite(buffer,1,strlen(buffer),fp);
+            ebp = childebp;
+            count++;
         }
-#endif
-    } else if (reason == CONTEXT_CHANGE_REASON_CALLBACK) {
-#if 0
-        cerr << "Received windows callback" << endl;
-#endif
+        fclose(fp);
+        FlushBuffer(false, from, threadid, false);
+        tmpflag=1;    
+        
+    } 
 
-    } else {
-        std::cerr << "Received other exception " << reason << endl;
-    }
-
-    LLOG("done handling exception\n");
     PIN_ReleaseLock(&lock);
+    if(tmpflag==1)
+    {
+        Cleanup();
+    }
 }
-
 VOID FollowChild(THREADID threadid, const CONTEXT* ctxt, VOID * arg)
 {
     dbg_printf("FollowChild tid=%d arg=%p\n", threadid, arg);

@@ -24,6 +24,10 @@ I have tested this fork only with the following configurations:
     * OPAM 1.1.1
     * OCaml 4.01.0
     * All BAP's OCaml package dependencies from OPAM
+    * capstone-3.0.5-rc2.tar.gz
+    * mysql
+    * idapro
+  
 
 * OS X 10.9.4 (no Pintool yet)
     * Apple LLVM version 5.1 (clang-503.0.40) (based on LLVM 3.4svn)

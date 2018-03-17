@@ -106,7 +106,7 @@ TOOL_CXXFLAGS += -I$(TRACEFORMATCOMMON) -I$(TRACEFORMATDIR) -I$(TRACEFORMATPBDIR
 # XXX We should probably use libtool
 PROTOBUFLIBDIR = $(PROTOBUFDIR)/.libs
 TOOL_LDFLAGS += -L$(PROTOBUFLIBDIR)
-TOOL_LIBS += $(LIBTRACE) -Wl,-rpath=$(PROTOBUFLIBDIR) -lprotobuf -lz -lpthread
+TOOL_LIBS += $(LIBTRACE) -Wl,-rpath=$(PROTOBUFLIBDIR) -lprotobuf -lz -lpthread -lcapstone
 
 BAPOBJS = $(OBJDIR)pivot$(OBJ_SUFFIX) $(OBJDIR)pin_misc$(OBJ_SUFFIX) $(OBJDIR)pin_taint$(OBJ_SUFFIX) $(OBJDIR)reg_mapping_pin$(OBJ_SUFFIX) $(OBJDIR)winsyscalls$(OBJ_SUFFIX)
 
