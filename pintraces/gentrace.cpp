@@ -2754,7 +2754,8 @@ VOID Cleanup()
     }
     fpaddrs.close();
 	stringstream ss;
-	ss << KnobOut.Value()<<"-"<<"assist.txt";
+	//ss << KnobOut.Value()<<"-"<<"assist.txt";
+    ss <<"assist.txt";
 	FILE *fp = fopen(ss.str().c_str(), "wb");
 	fwrite(g_TaintAsistBuff, 4, g_tsbufidx + 1, fp);
 	fclose(fp);

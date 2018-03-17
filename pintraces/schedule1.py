@@ -62,9 +62,18 @@ def stp_solve(old_sample_num,convert_addr,line_num):
         return 0
     else:
         return 1
+def clear_file(old_sample_num,convert_addr,line_num):
+    f_f=str(old_sample_num)+'-4_'+hex(convert_addr)+'_'+str(line_num)+'.f'
+    f_s=str(old_sample_num)+'-4_'+hex(convert_addr)+'_'+str(line_num)+'.s'
+    f_il_c=str(old_sample_num)+'-4_'+hex(convert_addr)+'_'+str(line_num)+'.il'
+    os.system('rm '+f_f)
+    #os.system('rm '+f_s)
+    os.system('rm '+f_il_c)
+    #f_assist=str(old_sample_num)+'-assist.txt'
+
 def make_sample(old_sample_num,new_sample_num,suffix_name,convert_addr,line_num): #int int string
     f_s=str(old_sample_num)+'-4_'+hex(convert_addr)+'_'+str(line_num)+'.s'
-    make_sample_cmd='makenewsample  '+f_s+' '+str(old_sample_num)+'-assist.txt '+ str(old_sample_num)+suffix_name+' '+str(new_sample_num)+suffix_name
+    make_sample_cmd='makenewsample  '+f_s+' '+' assist.txt '+ str(old_sample_num)+suffix_name+' '+str(new_sample_num)+suffix_name
     print "[*] make_sample  cmd: ", make_sample_cmd
     os.system(make_sample_cmd)
 
@@ -172,6 +181,7 @@ def main():
         else:
             # task fails
             set_task_status_2(old_sample_num,new_sample_num,convert_addr,convert_serial_num,line_num)
+        clear_file(old_sample_num,convert_addr,line_num)
 
             
 

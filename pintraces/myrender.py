@@ -86,8 +86,8 @@ def insert_task(run_base_addr,old_sample_num):
         for base1 in sort_module_list:
             if(convert_addr>base1[1]):
                 print 'before hash '+hex(convert_addr)
-                convert_addr=convert_addr-base1[1]
-                convert_addr=convert_addr^base1[0]
+                convert_addr=convert_addr-base1[1] #base addr
+                convert_addr=convert_addr^base1[0] #name hash
                 print 'after hash '+hex(convert_addr)
                 break
         convert_serial_num=int(line.split()[2],10) 
@@ -103,7 +103,13 @@ def insert_task(run_base_addr,old_sample_num):
         db.commit()
     f_taint.close()
     db.close()
-
+def clear_file(old_sample_num):
+    trace_file_name='%d-addrs.txt'%old_sample_num #main module jnz instruction
+    trace_file_name1='%d-addrs1.txt'%old_sample_num # tiant convert jnz instruction
+    module_file_name='%d-module.txt'%old_sample_num # module base addr
+    os.system('rm '+trace_file_name)
+    os.system('rm '+trace_file_name1)
+    os.system('rm '+module_file_name)
 def main():
     os.chdir('/Users/longlong/VirtualBox VMs/ubuntu14-disk/share')
     sample_num=1
@@ -129,7 +135,7 @@ def main():
     
 
     
-main()
+#main()
 #color_trace(1)
 print 'ok'
 

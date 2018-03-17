@@ -114,6 +114,13 @@ def bap_cmd_first(old_sample_num,offset1,offset2_len,coverage,elfpath,ext_comman
     lift_il(old_sample_num)
     get_taint_branch(old_sample_num,base_addr,high_addr)
     #cp_share_folder(old_sample_num)
+def clear_file(sample_num):
+    sample_il1=tr(sample_num)+"-1.il"
+    sample_il2=tr(sample_num)+"-2.il"
+    sample_bpt=str(sample_num)+"-trace.bpt"
+    os.system('rm '+sample_bpt)
+    os.system('rm '+sample_il1)
+    os.system('rm '+sample_il2)
 
 def main():
     global base_addr    
@@ -146,6 +153,8 @@ def main():
         bap_cmd_first(sample_num,offset1,offset2_len,coverage,elfpath,ext_command,suffix_name)
         set_sample_status_1(sample_num)
         sample_num_tuple=None
+        clear_file(sample_num)
+        
         
         
 
