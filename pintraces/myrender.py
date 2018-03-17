@@ -85,13 +85,13 @@ def insert_task(run_base_addr,old_sample_num):
         convert_addr=int(line.split()[1],10)
         for base1 in sort_module_list:
             if(convert_addr>base1[1]):
-                print 'before hash '+hex(convert_addr)
+                #print 'before hash '+hex(convert_addr)
                 convert_addr=convert_addr-base1[1] #base addr
                 convert_addr=convert_addr^base1[0] #name hash
-                print 'after hash '+hex(convert_addr)
+                #print 'after hash '+hex(convert_addr)
                 break
         convert_serial_num=int(line.split()[2],10) 
-        print hex(convert_addr),str(line_num),str(convert_serial_num)
+        #print hex(convert_addr),str(line_num),str(convert_serial_num)
         
         sql_cmd='insert ignore into task(old_sample_num,new_sample_num,convert_address,convert_serial_num,line_num,status) values('+str(old_sample_num)+','+str(g_new_num)+','+str(convert_addr)+','+str(convert_serial_num)+','+str(line_num)+','+str(0)+');'
         mm=cursor.execute(sql_cmd)
@@ -110,6 +110,32 @@ def clear_file(old_sample_num):
     os.system('rm '+trace_file_name)
     os.system('rm '+trace_file_name1)
     os.system('rm '+module_file_name)
+def get_jnz_ratio():
+    fsegmy=FirstSeg()
+    segci=0
+    jnz_count=0
+    jnz_color_count=0
+    while(fsegmy!=BADADDR ):
+        segci+=1
+        mysegattr=GetSegmentAttr(fsegmy,SEGATTR_TYPE)
+        if(mysegattr==2):
+            segnamemy=SegName(fsegmy)
+            segendmy=SegEnd(fsegmy)
+            print " (%s) is %d,segstart = %x,segend = %x" %(segnamemy,mysegattr,fsegmy,segendmy)
+            addr0=fsegmy
+            addr4=FindCode(addr0,SEARCH_DOWN)
+            while(addr4<segendmy):
+                Instruction = GetMnem(addr4)
+                #str_f=GetDisasm(addr4)
+                if (Instruction.find("j")!=-1 and Instruction!='jmp'):
+                    print Instruction
+                    if(get_color(addr4,CIC_ITEM)!=0xffffffff):  #str(get_color(here(),CIC_ITEM))
+                        jnz_color_count=jnz_color_count+1
+                    jnz_count=jnz_count+1
+                addr4=FindCode(addr4,SEARCH_DOWN)
+        fsegmy=NextSeg(fsegmy)
+    print str(jnz_count),str(jnz_color_count),str(jnz_color_count/(jnz_count*1.0))
+    return (jnz_count,jnz_color_count)
 def main():
     os.chdir('/Users/longlong/VirtualBox VMs/ubuntu14-disk/share')
     sample_num=1
@@ -132,11 +158,14 @@ def main():
             exit()
         insert_task(run_base_addr,sample_num)
         sample_num_tuple=None
+        get_jnz_ratio()
+        clear_file(sample_num)
     
 
     
 #main()
 #color_trace(1)
+get_all_jnz()
 print 'ok'
 
 
