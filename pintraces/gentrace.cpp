@@ -2596,7 +2596,7 @@ VOID ExceptionHandler(THREADID threadid, CONTEXT_CHANGE_REASON reason, const CON
     FlushBuffer(false, from, threadid, false);
     g_twnew->add(f);
     cout<<"reason 2= "<<reason<<endl;
-    if (reason == CONTEXT_CHANGE_REASON_FATALSIGNAL||CONTEXT_CHANGE_REASON_SIGNAL==reason) 
+    if (reason == CONTEXT_CHANGE_REASON_FATALSIGNAL||(CONTEXT_CHANGE_REASON_SIGNAL==reason&&info==6)) 
     {
         cout<<"reason 1= "<<reason<<endl;
         std::cerr << "Received fatal signal " << info << endl;

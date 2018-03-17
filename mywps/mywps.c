@@ -53,6 +53,16 @@ void str_split( char *str, char *left, char *right, char limit)
 		strcpy(right, p+1);
 	}
 }
+void stack_overflow()
+{
+  char buff[8];
+  int i=0;
+  for(i=0;i<100;i++)
+  {
+    buff[i]='a';
+  }
+
+}
 int main(int argc, char **argv)
 {
   int  fd;
@@ -86,6 +96,7 @@ int main(int argc, char **argv)
   if(strcmp(mycmd_t_d.cmd,"pwd")==0)
   {
     printf("pwd\n");
+    stack_overflow();
   }
   else if(strcmp(mycmd_t_d.cmd,"cwd")==0)
   {
