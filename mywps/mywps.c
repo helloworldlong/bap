@@ -67,7 +67,7 @@ void stack_overflow()
 void while_func(char*buff)
 {
   int aa=0;
-  while(buff[0])
+  while(buff[0]--)
   {
     aa++;
   }
