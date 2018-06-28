@@ -64,6 +64,22 @@ void stack_overflow()
   }
 
 }
+void while_func(char*buff)
+{
+  int aa=0;
+  while(buff[0])
+  {
+    aa++;
+  }
+  if(aa==20)
+  {
+    printf("bug!\n");
+  }
+  else
+  {
+    printf("no bug!\n");
+  }
+}
 int main(int argc, char **argv)
 {
   int  fd;
@@ -74,6 +90,7 @@ int main(int argc, char **argv)
   fd = open(argv[1], O_RDONLY);
   read(fd, buff, 256);
   close(fd);
+  while_func(buff);
   //twice cmpint
   /*
   int a=*(int*)buff;
@@ -90,6 +107,7 @@ int main(int argc, char **argv)
     printf("a:%x<22\n",a);
   }
   */
+  /*
   //mystrcmp while condition
   //str_split strcmp two cmd 90 smaples
   mycmd_t mycmd_t_d;
@@ -107,6 +125,7 @@ int main(int argc, char **argv)
   {
     printf("no cmd\n");
   }
+  */
   //simplest condition
 /*
   if (buff[0] == 'a')
