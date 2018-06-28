@@ -166,14 +166,14 @@ def main():
         insert_task(run_base_addr,sample_num)
         sample_num_tuple=None
         get_jnz_ratio(jnz_count)
-        clear_file(sample_num)
+        #clear_file(sample_num)
     
 
     
-#main()
+main()
 #color_trace(1)
-jnz_count=get_all_jnz()
-get_jnz_ratio(jnz_count)
+#jnz_count=get_all_jnz()
+#get_jnz_ratio(jnz_count)
 print 'ok'
 
 

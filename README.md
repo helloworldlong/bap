@@ -1,4 +1,23 @@
 This work is based on BAP(Binary Analysis Platform)
+macos:
+    sudo docker start mymysql
+    sudo docker exec -it mymysql /bin/bash
+    mysql -uroot -p123456
+    use bap;
+
+ubuntu:
+    cd /home/l/bap/pintraces
+    ./reset.sh
+macos: 
+    cd /Users/longlong/VirtualBox VMs/ubuntu14-disk/IDAPython
+    python create_bap_table.py
+    IDA Pro  open the test program and run myrender.py IDAPython script
+ubuntu:
+    cd /mnt/hgfs/ubuntu14-disk/share
+    python schedule.py 0 100 mywps ./mywps " " .txt 
+    python schedule1.py 0 100 mywps ./mywps " " .txt 
+
+
 =============================
 
 This is a fork of the BAP version 0.8 release that appeared at:
