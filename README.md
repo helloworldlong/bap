@@ -12,10 +12,12 @@ macos:
     cd /Users/longlong/VirtualBox VMs/ubuntu14-disk/IDAPython
     python create_bap_table.py
     IDA Pro  open the test program and run myrender.py IDAPython script
+    GetColor(here(),CIC_ITEM)
 ubuntu:
     cd /mnt/hgfs/ubuntu14-disk/share
     python schedule.py 0 100 mywps ./mywps " " .txt 
     python schedule1.py 0 100 mywps ./mywps " " .txt 
+
 
 
 =============================
