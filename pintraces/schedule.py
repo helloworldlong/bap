@@ -101,9 +101,9 @@ def get_taint_branch(old_sample_num,base_addr,high_addr):
                         print 'label error'
                         exit()
         file_line_num=file_line_num+1
-    
+    taint_branch1=sorted(taint_branch.items(),key=lambda item:item[0])
     f_o=open('%d-addrs1.txt'%old_sample_num,'w')
-    for line_num_1,(convert_addr_1,serial_num_1) in taint_branch.items():
+    for (line_num_1,(convert_addr_1,serial_num_1)) in taint_branch1:
         f_o.write(str(line_num_1)+' '+str(convert_addr_1)+' '+str(serial_num_1)+'\n')
     f_o.close()
    
@@ -145,8 +145,8 @@ def main():
                 time.sleep(2)
             else:
                 sample_num=sample_num_tuple[0]
-                serial_num_convert=sample_num_tuple[1]
-                print 'get sample_num %d and serial_num %d' %(sample_num_tuple[0],serial_num_convert)
+                #serial_num_convert=sample_num_tuple[1]
+                print 'get sample_num %d' %(sample_num_tuple[0])
                 break
         
         set_sample_status_3(sample_num)

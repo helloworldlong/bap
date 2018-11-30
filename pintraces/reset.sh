@@ -7,3 +7,5 @@ cp ./create_bap_table.py /mnt/hgfs/ubuntu14-disk/IDAPython/
 cp ../mywps/mywps /mnt/hgfs/ubuntu14-disk/share/
 cp /usr/local/bin/file /mnt/hgfs/ubuntu14-disk/share/
 cp ../mywps/mywps /mnt/hgfs/ubuntu14-disk/share/1.elf 
+cp ./print_out.py /mnt/hgfs/ubuntu14-disk/share/
+python create_bap_table.py

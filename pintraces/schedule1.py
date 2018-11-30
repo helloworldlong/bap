@@ -124,10 +124,10 @@ def get_base_addr(old_sample_num):
     ff.close()
     return base_addr,high_addr
 
-def insert_sample(sample_num):
+def insert_sample(sample_num,convert_serial_num):
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
-    sql_cmd='insert ignore into sample(sample_num,status) values('+str(sample_num)+','+str(0)+');'
+    sql_cmd='insert ignore into sample(sample_num,status,serial_num_convert) values('+str(sample_num)+','+str(0)+','+str(convert_serial_num)+');'
     cursor.execute(sql_cmd)
     db.commit()
     db.close()
@@ -138,7 +138,7 @@ def bap_cmd_second(old_sample_num,new_sample_num,offset1,offset2_len,coverage,el
     stp_success=stp_solve(old_sample_num,convert_addr,line_num)
     if(stp_success==1):
         make_sample(old_sample_num,new_sample_num,suffix_name,convert_addr,line_num)
-        insert_sample(new_sample_num)
+        insert_sample(new_sample_num,convert_serial_num)
         return 1
     else:
         print "stp does not solve it."

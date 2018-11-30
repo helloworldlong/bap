@@ -19,13 +19,13 @@ def color_trace(old_sample_num):
         #get trace address list
         if(first_line==1):           
             run_base_addr=int(line.split()[0],16)
-            print 'here'
-            print hex(run_base_addr)
+            #print 'here'
+            #print hex(run_base_addr)
             first_line=0
             continue
         tmp_addr=int(line,16)+mybase_addr
         mycolor=old_sample_num   
-        print hex(tmp_addr)+' '+hex(mycolor)  
+        #print hex(tmp_addr)+' '+hex(mycolor)  
         set_color(tmp_addr,CIC_ITEM,mycolor)
     f_trace.close()
     return run_base_addr
@@ -73,7 +73,7 @@ def insert_task(run_base_addr,old_sample_num,serial_num_convert):
         hash_val=int(line.split()[0],16) #can not overflow!!!
         base_addr=int(line.split()[1],16)
         module_list.append((hash_val,base_addr))
-    print module_list
+    #print module_list
     f_module.close()
     #sort
     sort_module_list=quicksort(module_list)
@@ -82,8 +82,10 @@ def insert_task(run_base_addr,old_sample_num,serial_num_convert):
     #print str(old_sample_num)+' run_base_addr: '+hex(run_base_addr)
     convert_num=0
     for line in f_taint.readlines():
-        if(convert_num<=serial_num_convert):
+        print line
+        if(convert_num<serial_num_convert):
             convert_num=convert_num+1
+            print str(convert_num)+',serial: '+str(serial_num_convert)+', old: '+str(old_sample_num)
             continue
         line_num=int(line.split()[0],10) #can not overflow!!!
         convert_addr=int(line.split()[1],10)

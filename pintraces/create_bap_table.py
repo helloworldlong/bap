@@ -37,7 +37,7 @@ sql = """CREATE TABLE sample (
 cursor.execute(sql)
 
 # initial the BAP table
-cursor.execute("INSERT INTO sample(sample_num,status) VALUES(1,0,0);")
+cursor.execute("INSERT INTO sample(sample_num,status,serial_num_convert) VALUES(1,0,0);")
 db.commit()
 
 cursor.execute("SELECT * FROM sample")
