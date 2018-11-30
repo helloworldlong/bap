@@ -25,18 +25,19 @@ sql = """CREATE TABLE task (
 cursor.execute(sql)
 sql='''
 ALTER TABLE task
-ADD UNIQUE KEY(convert_address,convert_serial_num);
+ADD UNIQUE KEY(old_sample_num,convert_serial_num);
 '''
 cursor.execute(sql)
 sql = """CREATE TABLE sample (
          sample_num  INT(32) UNSIGNED,
          status INT(32) UNSIGNED,
+         serial_num_convert INT(32) UNSIGNED,
          UNIQUE KEY (sample_num)
           )"""
 cursor.execute(sql)
 
 # initial the BAP table
-cursor.execute("INSERT INTO sample(sample_num,status) VALUES(1,0);")
+cursor.execute("INSERT INTO sample(sample_num,status) VALUES(1,0,0);")
 db.commit()
 
 cursor.execute("SELECT * FROM sample")

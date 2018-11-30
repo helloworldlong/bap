@@ -6,13 +6,24 @@
 #include <unistd.h>
 #include <string.h>
 
-
+void while_func(char*buff)
+{
+  int count=0;
+  char *pbuff,buff1[8];
+  for(pbuff=buff;*pbuff=='a' && *pbuff!='\0';pbuff++){
+    count++;
+  }
+  if(count==10)
+    strcpy(buff1,buff);
+  else
+    strncpy(buff1,buff,8);
+  printf("%s\n",buff1);
+}
 int main(int argc, char **argv)
 {
   int  fd;
   int flag=0;
-  int cnt=0;
-  char  buff[10] = {0};
+  char  buff[260] = {0};
   if(argc!=2){
     printf("there should be two parameters\n");
     return 1;
@@ -20,11 +31,7 @@ int main(int argc, char **argv)
   fd = open(argv[1], O_RDONLY);
   read(fd, buff, 256);
   close(fd);
-  if(buff[0]=='b')cnt++;
-  if(buff[1]=='a')cnt++;
-  if(buff[2]=='d')cnt++;
-  if(buff[3]=='!')cnt++;
-  if(cnt>=4)abort();
+  while_func(buff); 
   return 0;
 }
 

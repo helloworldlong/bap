@@ -33,7 +33,7 @@ def color_trace(old_sample_num):
 def get_sample_num():#return sample_num
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
-    sql_cmd='select sample_num from sample where status=1 order by sample_num;'
+    sql_cmd='select sample_num,serial_num_convert from sample where status=1 order by sample_num;'
     cursor.execute(sql_cmd)
     data = cursor.fetchone()
     db.close()
@@ -60,7 +60,7 @@ def quicksort(nums):
             greater.append(base1)
     return quicksort(less) + [base] + quicksort(greater)
 
-def insert_task(run_base_addr,old_sample_num):
+def insert_task(run_base_addr,old_sample_num,serial_num_convert):
     global g_new_num
     # get the convert_addr
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
@@ -80,7 +80,11 @@ def insert_task(run_base_addr,old_sample_num):
 
     f_taint = open(trace_file_name,'r')
     #print str(old_sample_num)+' run_base_addr: '+hex(run_base_addr)
+    convert_num=0
     for line in f_taint.readlines():
+        if(convert_num<=serial_num_convert):
+            convert_num=convert_num+1
+            continue
         line_num=int(line.split()[0],10) #can not overflow!!!
         convert_addr=int(line.split()[1],10)
         for base1 in sort_module_list:
@@ -157,13 +161,14 @@ def main():
                 print 'get trace %d'%sample_num_tuple[0]
                 break
         sample_num=sample_num_tuple[0]
+        serial_num_convert=sample_num_tuple[1]
         set_sample_status_2(sample_num)
         #print sample_num
         run_base_addr=color_trace(sample_num)
         if(run_base_addr==0):
             print 'run_base_addr=0'
             exit()
-        insert_task(run_base_addr,sample_num)
+        insert_task(run_base_addr,sample_num,serial_num_convert)
         sample_num_tuple=None
         get_jnz_ratio(jnz_count)
         #clear_file(sample_num)

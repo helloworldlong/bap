@@ -33,7 +33,7 @@ def lift_il(old_sample_num):#int
 def get_sample_num():#return sample_num
     db = MySQLdb.connect(mysql_server_ip,"root","123456","bap" )
     cursor = db.cursor()
-    sql_cmd='select sample_num from sample where status=0 order by sample_num;'
+    sql_cmd='select sample_num,serial_num_convert from sample where status=0 order by sample_num;'
     cursor.execute(sql_cmd)
     data = cursor.fetchone()
     db.close()
@@ -145,7 +145,8 @@ def main():
                 time.sleep(2)
             else:
                 sample_num=sample_num_tuple[0]
-                print 'get sample_num %d' %sample_num_tuple[0]
+                serial_num_convert=sample_num_tuple[1]
+                print 'get sample_num %d and serial_num %d' %(sample_num_tuple[0],serial_num_convert)
                 break
         
         set_sample_status_3(sample_num)
